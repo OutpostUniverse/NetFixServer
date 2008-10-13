@@ -177,7 +177,7 @@ void GameServer::ProcessPacket(Packet &packet, sockaddr_in &from)
 		for (gameInfoIndex = 0; gameInfoIndex < numGames; gameInfoIndex++)
 		{
 			// Check if the Session Identifier matches
-			if (gameInfo[gameInfoIndex].sessionIdentifier == packet.tlMessage.joinRequest.sessionIdentifier)
+			if (memcmp(&gameInfo[gameInfoIndex].sessionIdentifier, &packet.tlMessage.joinRequest.sessionIdentifier, sizeof(packet.tlMessage.joinRequest.sessionIdentifier)) == 0)
 			{
 				// Send the Join Help Request
 				SendTo(packet, gameInfo[gameInfoIndex].addr);

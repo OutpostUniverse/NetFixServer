@@ -1,13 +1,27 @@
 #include "ErrorLog.h"
 #include "GameServer.h"
 
+
+const char PortNumParam[] = "PortNum=";
+
+
 int main(int argc, char **argv)
 {
 	int errorCode;
 	GameServer gameServer;
 	int portNum = 47777;
+	int stringLen;
+	int i;
 
-	// Check for command line parameters **TODO**
+	stringLen = strlen(PortNumParam);
+	// Check for command line parameters
+	for (i = 0; i < argc; i++)
+	{
+		if (strncmp(argv[i], PortNumParam, stringLen) == 0)
+		{
+			portNum = atoi(&argv[i][stringLen]);
+		}
+	}
 
 	// Start the game server
 	errorCode = gameServer.StartServer(portNum);
