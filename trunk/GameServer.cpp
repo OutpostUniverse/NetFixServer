@@ -164,6 +164,27 @@ void GameServer::ProcessPacket(Packet &packet, sockaddr_in &from)
 
 	switch(packet.tlMessage.tlHeader.commandType)
 	{
+	case tlcJoinRequest:
+		// Verify the packet size
+		if (packet.header.sizeOfPayload != sizeof(JoinRequest))
+			return;		// Discard (bad size)
+		
+		packet.tlMessage.tlHeader.commandType = tlcJoinHelpRequest;
+		packet.tlMessage.joinHelpRequest.clientAddr = from;
+		packet.tlMessage.joinHelpRequest.clientAddr.sin_family = 2;		// ** AF_INET
+
+		// Search for a corresponding Session Identifer
+		for (gameInfoIndex = 0; gameInfoIndex < numGames; gameInfoIndex++)
+		{
+			// Check if the Session Identifier matches
+			if (gameInfo[gameInfoIndex].sessionIdentifier == packet.tlMessage.joinRequest.sessionIdentifier)
+			{
+				// Send the Join Help Request
+				SendTo(packet, gameInfo[gameInfoIndex].addr);
+			}
+		}
+
+		break;
 	case tlcHostedGameSearchQuery:
 		// Verify packet size
 		if (packet.header.sizeOfPayload != sizeof(HostedGameSearchQuery))
