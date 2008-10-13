@@ -101,9 +101,9 @@ struct TransportLayerHeader
 
 struct JoinRequest : public TransportLayerHeader
 {
-	GUID sessionIdentifier;
-	int returnPortNum;			// [47800-47807]
-	char password[12];
+	GUID sessionIdentifier Pack;
+	int returnPortNum Pack;			// [47800-47807]
+	char password[12] Pack;
 };
 
 
@@ -150,10 +150,10 @@ struct GameServerPoke : public TransportLayerHeader
 
 struct JoinHelpRequest : public TransportLayerHeader
 {
-	GUID sessionIdentifier;
-	int returnPortNum;			// [47800-47807]
-	char password[12];
-	sockaddr_in clientAddr;
+	GUID sessionIdentifier Pack;
+	int returnPortNum Pack;			// [47800-47807]
+	char password[12] Pack;
+	sockaddr_in clientAddr Pack;
 };
 
 
