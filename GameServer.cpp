@@ -160,6 +160,7 @@ void GameServer::ProcessPacket(Packet &packet, sockaddr_in &from)
 
 	#ifdef DEBUG
 		//LogMessage("ProcessPacket");
+		//LogValue("CommandType: ", packet.tlMessage.tlHeader.commandType);
 	#endif
 
 	switch(packet.tlMessage.tlHeader.commandType)
@@ -169,6 +170,8 @@ void GameServer::ProcessPacket(Packet &packet, sockaddr_in &from)
 		if (packet.header.sizeOfPayload != sizeof(JoinRequest))
 			return;		// Discard (bad size)
 		
+		LogEndpoint("Game Join Request from: ", from.sin_addr.s_addr, from.sin_port);
+
 		packet.tlMessage.tlHeader.commandType = tlcJoinHelpRequest;
 		packet.tlMessage.joinHelpRequest.clientAddr = from;
 		packet.tlMessage.joinHelpRequest.clientAddr.sin_family = 2;		// ** AF_INET
