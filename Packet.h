@@ -76,9 +76,11 @@ struct PacketHeader
 
 enum TransportLayerCommandType
 {
+	tlcJoinRequest = 0,
 	tlcHostedGameSearchQuery = 7,
 	tlcHostedGameSearchReply = 8,
 	tlcGameServerPoke = 9,
+	tlcJoinHelpRequest = 10,
 };
 
 
@@ -95,6 +97,15 @@ struct TransportLayerHeader
 
 
 // ----------------------------------------
+
+
+struct JoinRequest : public TransportLayerHeader
+{
+	GUID sessionIdentifier;
+	int returnPortNum;			// [47800-47807]
+	char password[12];
+};
+
 
 // ---------------------
 // Custom Packet formats
@@ -137,6 +148,14 @@ struct GameServerPoke : public TransportLayerHeader
 	int randValue Pack;
 };
 
+struct JoinHelpRequest : public TransportLayerHeader
+{
+	GUID sessionIdentifier;
+	int returnPortNum;			// [47800-47807]
+	char password[12];
+	sockaddr_in clientAddr;
+};
+
 
 // ----------------------------------------
 
@@ -146,9 +165,11 @@ union TransportLayerMessage
 	TransportLayerHeader tlHeader;
 
 	// Custom messages
+	JoinRequest joinRequest;
 	HostedGameSearchQuery searchQuery;
 	HostedGameSearchReply searchReply;
 	GameServerPoke gameServerPoke;
+	JoinHelpRequest joinHelpRequest;
 };
 
 
