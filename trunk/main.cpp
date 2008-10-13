@@ -9,7 +9,7 @@ int main(int argc, char **argv)
 {
 	int errorCode;
 	GameServer gameServer;
-	int portNum = 47777;
+	int portNum = 47800;
 	int stringLen;
 	int i;
 
