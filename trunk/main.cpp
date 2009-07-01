@@ -1,3 +1,16 @@
+// To start server with logging to a file:
+// screen
+// ./OPUNetGameServer 2>&1 | tee log.txt
+//
+// This redirects stderr to stdout, and then pipes the output of stdout to tee.
+// Tee will output stdout to the screen as well as to the file given.
+// This is like a T-connector for splitting TV signals.
+// The screen session is needed to keep the server running after logging out.
+// Normally programs are terminated when the login shell that spawns them exits.
+//
+// An optional port number can also be specified on the command line, but this is not recommended.
+
+
 #include "ErrorLog.h"
 #include "GameServer.h"
 
