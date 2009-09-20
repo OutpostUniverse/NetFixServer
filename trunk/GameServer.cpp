@@ -70,30 +70,13 @@ int GameServer::StartServer(unsigned short port)
 	#endif
 
 	// Create the host socket
-	hostSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-	// Check for errors
-	if (hostSocket == INVALID_SOCKET)
-		return SocketCreateFailed;			// Error
-
-	// Bind the socket to the host port
-	sockaddr_in hostAddress;
-	// Initialize the struct
-	memset(hostAddress.sin_zero, 0, sizeof(hostAddress.sin_zero));
-	hostAddress.sin_family = AF_INET;
-	hostAddress.sin_port = htons(port);
-	hostAddress.sin_addr.s_addr = INADDR_ANY;
-	// Bind the socket
-	errorCode = bind(hostSocket, (sockaddr*)&hostAddress, sizeof(hostAddress));
-	// Check for errors
-	if (errorCode == SOCKET_ERROR)
-		return SocketBindFailed;			// Error
-
-	// Set non-blocking mode
-	unsigned long argp = true;
-	errorCode = ioctlsocket(hostSocket, FIONBIO, &argp);
-	// Check for errors
-	if (errorCode != 0)
-		return SocketNonBlockingModeFailed;	// Error
+	errorCode = AllocSocket(hostSocket, port);
+	if (errorCode != NoError)
+		return errorCode;
+	// Create the secondary socket
+	errorCode = AllocSocket(secondarySocket, port + 1);
+	if (errorCode != NoError)
+		return errorCode;
 
 	// Allocate space to store games list
 	numGames = 0;
@@ -105,7 +88,6 @@ int GameServer::StartServer(unsigned short port)
 
 	return NoError;							// Success
 }
-
 
 void GameServer::Pump()
 {
@@ -148,10 +130,45 @@ void GameServer::WaitForEvent()
 	// Clear the read 
 	FD_ZERO(&readfds);
 	FD_SET(hostSocket, &readfds);
+	FD_SET(secondarySocket, &readfds);
 	// Wait for packets or timeout
 	select(1, &readfds, 0, 0, &timeOut);
 }
 
+
+int GameServer::AllocSocket(SOCKET& hostSocket, unsigned short port)
+{
+	int errorCode;
+
+	// Create the host socket
+	hostSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	// Check for errors
+	if (hostSocket == INVALID_SOCKET)
+		return SocketCreateFailed;			// Error
+
+	// Bind the socket to the host port
+	sockaddr_in hostAddress;
+	// Initialize the struct
+	memset(hostAddress.sin_zero, 0, sizeof(hostAddress.sin_zero));
+	hostAddress.sin_family = AF_INET;
+	hostAddress.sin_port = htons(port);
+	hostAddress.sin_addr.s_addr = INADDR_ANY;
+	// Bind the socket
+	errorCode = bind(hostSocket, (sockaddr*)&hostAddress, sizeof(hostAddress));
+	// Check for errors
+	if (errorCode == SOCKET_ERROR)
+		return SocketBindFailed;			// Error
+
+	// Set non-blocking mode
+	unsigned long argp = true;
+	errorCode = ioctlsocket(hostSocket, FIONBIO, &argp);
+	// Check for errors
+	if (errorCode != 0)
+		return SocketNonBlockingModeFailed;	// Error
+
+	// Return success
+	return NoError;
+}
 
 void GameServer::ProcessPacket(Packet &packet, sockaddr_in &from)
 {
@@ -310,6 +327,32 @@ void GameServer::ProcessPacket(Packet &packet, sockaddr_in &from)
 
 			break;
 		}
+		break;
+	case tlcRequestExternalAddress:
+		// Verify packet size
+		if (packet.header.sizeOfPayload != sizeof(RequestExternalAddress))
+			return;		// Discard (bad size)
+
+		// Cache the internal port being used
+		unsigned short internalPort = packet.tlMessage.requestExternalAddress.internalPort;
+
+		// Construct a reply
+		packet.tlMessage.tlHeader.commandType = tlcEchoExternalAddress;
+		packet.tlMessage.echoExternalAddress.addr = from;
+		packet.tlMessage.echoExternalAddress.replyPort = from.sin_port;
+
+		// Send first reply
+		SendTo(packet, from);
+
+		// Check if they have a different internal address
+		if (from.sin_port != internalPort)
+		{
+			// Send second reply
+			packet.tlMessage.echoExternalAddress.replyPort = internalPort;
+			from.sin_port = internalPort;
+			SendTo(packet, from);
+		}
+
 		break;
 	}
 }
@@ -495,8 +538,15 @@ int GameServer::ReceiveFrom(Packet &packet, sockaddr_in &from)
 	// Check for errors
 	if (numBytes == SOCKET_ERROR)
 	{
-		// Check if not a would block error **TODO**
-		return PacketNone;				// No Packet (would block)
+		// Try the secondary socket
+		numBytes = recvfrom(secondarySocket, (char*)&packet, sizeof(packet), 0, (sockaddr*)&from, &addrLen);
+
+		// Check for errors
+		if (numBytes == SOCKET_ERROR)
+		{
+			// Check if not a would block error **TODO**
+			return PacketNone;				// No Packet (would block)
+		}
 	}
 
 	#ifdef DEBUG

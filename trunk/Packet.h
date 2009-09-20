@@ -81,6 +81,8 @@ enum TransportLayerCommandType
 	tlcHostedGameSearchReply = 8,
 	tlcGameServerPoke = 9,
 	tlcJoinHelpRequest = 10,
+	tlcRequestExternalAddress = 11,
+	tlcEchoExternalAddress = 12,
 };
 
 
@@ -156,6 +158,17 @@ struct JoinHelpRequest : public TransportLayerHeader
 	sockaddr_in clientAddr Pack;
 };
 
+struct RequestExternalAddress : public TransportLayerHeader
+{
+	unsigned short internalPort Pack;
+};
+
+struct EchoExternalAddress : public TransportLayerHeader
+{
+	unsigned short replyPort Pack;
+	sockaddr_in addr Pack;
+};
+
 
 // ----------------------------------------
 
@@ -170,6 +183,8 @@ union TransportLayerMessage
 	HostedGameSearchReply searchReply;
 	GameServerPoke gameServerPoke;
 	JoinHelpRequest joinHelpRequest;
+	RequestExternalAddress requestExternalAddress;
+	EchoExternalAddress echoExternalAddress;
 };
 
 

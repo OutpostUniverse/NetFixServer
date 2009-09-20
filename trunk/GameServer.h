@@ -74,6 +74,7 @@ public:
 
 private:
 	// Private functions
+	int AllocSocket(SOCKET &socket, unsigned short port);
 	void ProcessPacket(Packet &packet, sockaddr_in &from);
 	void DoTimedUpdates();
 	int FindGameInfoClient(sockaddr_in &from, unsigned int clientRandValue);
@@ -123,6 +124,7 @@ private:
 
 	// Private member variables
 	SOCKET hostSocket;
+	SOCKET secondarySocket;
 	GameInfo* gameInfo;
 	unsigned int numGames;
 	unsigned int maxNumGames;
