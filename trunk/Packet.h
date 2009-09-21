@@ -63,8 +63,8 @@ struct PacketHeader
 {
 	int sourcePlayerNetID Pack;
 	int destPlayerNetID Pack;
-	unsigned char sizeOfPayload Pack;
-	unsigned char type Pack;
+	unsigned char sizeOfPayload;
+	unsigned char type;
 	int checksum Pack;
 };
 
@@ -105,7 +105,7 @@ struct JoinRequest : public TransportLayerHeader
 {
 	GUID sessionIdentifier Pack;
 	int returnPortNum Pack;			// [47800-47807]
-	char password[12] Pack;
+	char password[12];
 };
 
 
@@ -117,14 +117,14 @@ struct JoinRequest : public TransportLayerHeader
 struct CreateGameInfo
 {
 	StartupFlags startupFlags Pack;
-	char gameCreatorName[15] Pack;
+	char gameCreatorName[15];
 };
 
 struct HostedGameSearchQuery : public TransportLayerHeader
 {
 	GUID gameIdentifier Pack;
 	unsigned int timeStamp Pack;
-	char password[12] Pack;
+	char password[12];
 };
 
 struct HostedGameSearchReply : public TransportLayerHeader
@@ -132,7 +132,7 @@ struct HostedGameSearchReply : public TransportLayerHeader
 	GUID gameIdentifier Pack;
 	unsigned int timeStamp Pack;
 	GUID sessionIdentifier Pack;
-	CreateGameInfo createGameInfo Pack;
+	CreateGameInfo createGameInfo;
 	sockaddr_in hostAddress Pack;
 };
 
@@ -154,7 +154,7 @@ struct JoinHelpRequest : public TransportLayerHeader
 {
 	GUID sessionIdentifier Pack;
 	int returnPortNum Pack;			// [47800-47807]
-	char password[12] Pack;
+	char password[12];
 	sockaddr_in clientAddr Pack;
 };
 
