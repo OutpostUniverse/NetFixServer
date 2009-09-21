@@ -337,6 +337,7 @@ void GameServer::ProcessPacket(Packet &packet, sockaddr_in &from)
 		unsigned short internalPort = packet.tlMessage.requestExternalAddress.internalPort;
 
 		// Construct a reply
+		packet.header.sizeOfPayload = sizeof(EchoExternalAddress);
 		packet.tlMessage.tlHeader.commandType = tlcEchoExternalAddress;
 		packet.tlMessage.echoExternalAddress.addr = from;
 		packet.tlMessage.echoExternalAddress.replyPort = from.sin_port;
@@ -349,7 +350,7 @@ void GameServer::ProcessPacket(Packet &packet, sockaddr_in &from)
 		{
 			// Send second reply
 			packet.tlMessage.echoExternalAddress.replyPort = internalPort;
-			from.sin_port = internalPort;
+			from.sin_port = htons(internalPort);
 			SendTo(packet, from);
 		}
 
