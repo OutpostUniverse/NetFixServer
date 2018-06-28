@@ -13,6 +13,7 @@
 
 #include "ErrorLog.h"
 #include "GameServer.h"
+#include <cstdlib>
 
 
 const char PortNumParam[] = "PortNum=";
