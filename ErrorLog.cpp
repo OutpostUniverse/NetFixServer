@@ -4,27 +4,27 @@
 ostream &logFile = cerr;
 
 
-void LogMessage(char* message)
+void LogMessage(const char* message)
 {
 	logFile << message << endl;
 }
 
-void LogString(char* message, char* string)
+void LogString(const char* message, const char* string)
 {
 	logFile << message << string << endl;
 }
 
-void LogValue(char* message, int value)
+void LogValue(const char* message, int value)
 {
 	logFile << message << dec << value << endl;
 }
 
-void LogValueHex(char* message, int value)
+void LogValueHex(const char* message, int value)
 {
 	logFile << message << hex << value << endl;
 }
 
-void LogEndpoint(char* message, unsigned long ipAddr, unsigned short port)
+void LogEndpoint(const char* message, unsigned long ipAddr, unsigned short port)
 {
 	union
 	{
