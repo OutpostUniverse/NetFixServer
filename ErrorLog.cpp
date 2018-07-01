@@ -1,27 +1,27 @@
 #include "ErrorLog.h"
 
 
-ostream &logFile = cerr;
+std::ostream &logFile = std::cerr;
 
 
 void LogMessage(const char* message)
 {
-	logFile << message << endl;
+	logFile << message << std::endl;
 }
 
 void LogString(const char* message, const char* string)
 {
-	logFile << message << string << endl;
+	logFile << message << string << std::endl;
 }
 
 void LogValue(const char* message, int value)
 {
-	logFile << message << dec << value << endl;
+	logFile << message << std::dec << value << std::endl;
 }
 
 void LogValueHex(const char* message, int value)
 {
-	logFile << message << hex << value << endl;
+	logFile << message << std::hex << value << std::endl;
 }
 
 void LogEndpoint(const char* message, unsigned long ipAddr, unsigned short port)
@@ -41,7 +41,7 @@ void LogEndpoint(const char* message, unsigned long ipAddr, unsigned short port)
 	ip.ipAddr = ipAddr;
 
 	logFile << message << (unsigned int)ip.b1 << "." << (unsigned int)ip.b2 << "." << (unsigned int)ip.b3 << "." << (unsigned int)ip.b4 
-			<< ":" << port << endl;
+			<< ":" << port << std::endl;
 }
 
 void LogCounters(GameServerCounters &counters)
@@ -60,16 +60,16 @@ void LogCounters(GameServerCounters &counters)
 	logFile << " Games: (Hosted: " << counters.numGamesHosted
 			<< ", Started: " << counters.numGamesStarted
 			<< ", Cancelled: " << counters.numGamesCancelled
-			<< ", Dropped: " << counters.numGamesDropped << ")" << endl;
+			<< ", Dropped: " << counters.numGamesDropped << ")" << std::endl;
 	// Traffic counters
 	logFile << " Traffic: (PacketRecv: " << counters.numPacketsReceived
 			<< ", ByteRecv: " << counters.numBytesReceived
 			<< ", PacketSent: " << counters.numPacketsSent
-			<< ", ByteSent: " << counters.numBytesSent << ")" << endl;
+			<< ", ByteSent: " << counters.numBytesSent << ")" << std::endl;
 	// Performance counters
 	logFile << " Performance: (DropHostPoke:" << counters.numDroppedHostedPokes
 			<< ", UpdateRequestSent:" << counters.numUpdateRequestSent
-			<< ", RetrySent:" << counters.numRetrySent << ")" << endl;
+			<< ", RetrySent:" << counters.numRetrySent << ")" << std::endl;
 }
 
 
@@ -87,28 +87,28 @@ void LogCounters(GameServerCounters &counters)
 
 	// Output the counters
 	// Game counters
-	logFile << endl;
-	logFile << "counters.numGamesHosted   : " << counters.numGamesHosted << endl;
-	logFile << "counters.numGamesStarted  : " << counters.numGamesStarted << endl;
-	logFile << "counters.numGamesCancelled: " << counters.numGamesCancelled << endl;
-	logFile << "counters.numGamesDropped  : " << counters.numGamesDropped << endl;
+	logFile << std::endl;
+	logFile << "counters.numGamesHosted   : " << counters.numGamesHosted << std::endl;
+	logFile << "counters.numGamesStarted  : " << counters.numGamesStarted << std::endl;
+	logFile << "counters.numGamesCancelled: " << counters.numGamesCancelled << std::endl;
+	logFile << "counters.numGamesDropped  : " << counters.numGamesDropped << std::endl;
 	// Traffic counters
-	logFile << "counters.numPacketsReceived: " << counters.numPacketsReceived << endl;
-	logFile << "counters.numBytesReceived  : " << counters.numBytesReceived << endl;
-	logFile << "counters.numPacketsSent    : " << counters.numPacketsSent << endl;
-	logFile << "counters.numBytesSent      : " << counters.numBytesSent << endl;
+	logFile << "counters.numPacketsReceived: " << counters.numPacketsReceived << std::endl;
+	logFile << "counters.numBytesReceived  : " << counters.numBytesReceived << std::endl;
+	logFile << "counters.numPacketsSent    : " << counters.numPacketsSent << std::endl;
+	logFile << "counters.numBytesSent      : " << counters.numBytesSent << std::endl;
 	// Performance counters
-	logFile << "counters.numDroppedHostedPokes :" << counters.numDroppedHostedPokes << endl;
-	logFile << "counters.numUpdateRequestSent  :" << counters.numUpdateRequestSent << endl;
-	logFile << "counters.numRetrySent          :" << counters.numRetrySent << endl;
-	logFile << "counters.numNewHost            :" << counters.numNewHost << endl;
+	logFile << "counters.numDroppedHostedPokes :" << counters.numDroppedHostedPokes << std::endl;
+	logFile << "counters.numUpdateRequestSent  :" << counters.numUpdateRequestSent << std::endl;
+	logFile << "counters.numRetrySent          :" << counters.numRetrySent << std::endl;
+	logFile << "counters.numNewHost            :" << counters.numNewHost << std::endl;
 	// Receive Error counts
-	logFile << "counters.numMinSizeErrors      :" << counters.numMinSizeErrors << endl;
-	logFile << "counters.numSizeFieldErrors    :" << counters.numSizeFieldErrors << endl;
-	logFile << "counters.numTypeFieldErrors    :" << counters.numTypeFieldErrors << endl;
-	logFile << "counters.numChecksumFieldErrors:" << counters.numChecksumFieldErrors << endl;
+	logFile << "counters.numMinSizeErrors      :" << counters.numMinSizeErrors << std::endl;
+	logFile << "counters.numSizeFieldErrors    :" << counters.numSizeFieldErrors << std::endl;
+	logFile << "counters.numTypeFieldErrors    :" << counters.numTypeFieldErrors << std::endl;
+	logFile << "counters.numChecksumFieldErrors:" << counters.numChecksumFieldErrors << std::endl;
 	// Error counts
-	logFile << "counters.numFailedGameInfoAllocs:" << counters.numFailedGameInfoAllocs << endl;
-	logFile << endl;
+	logFile << "counters.numFailedGameInfoAllocs:" << counters.numFailedGameInfoAllocs << std::endl;
+	logFile << std::endl;
 }
 */
