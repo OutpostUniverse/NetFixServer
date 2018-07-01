@@ -24,12 +24,14 @@ $(OUTPUT): $(OBJS)
 	@mkdir -p ${@D}
 	$(CXX) $^ $(LDFLAGS) -o $@
 
-$(OBJS): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp $(DEPDIR)/%.d | $(OBJDIR)/ $(DEPDIR)/
+$(OBJS): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp $(DEPDIR)/%.d | build-folder
 	$(COMPILE.cpp) $(OUTPUT_OPTION) $<
 	$(POSTCOMPILE)
 
-%/:
-	@mkdir -p $@
+.PHONY:build-folder
+build-folder:
+	@mkdir -p $(patsubst $(SRCDIR)/%,$(OBJDIR)/%, $(FOLDERS))
+	@mkdir -p $(patsubst $(SRCDIR)/%,$(DEPDIR)/%, $(FOLDERS))
 
 $(DEPDIR)/%.d: ;
 .PRECIOUS: $(DEPDIR)/%.d
