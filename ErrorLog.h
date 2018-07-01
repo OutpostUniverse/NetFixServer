@@ -2,12 +2,11 @@
 	#include <iostream.h>
 #else
 	#include <iostream>
-	using namespace std;
 #endif
 #include "GameServer.h"
 
 
-extern ostream &logFile;
+extern std::ostream &logFile;
 
 
 void LogMessage(const char* message);
