@@ -1,8 +1,5 @@
-#ifdef WIN32
-	#include <iostream.h>
-#else
-	#include <iostream>
-#endif
+#include <iostream>
+
 #include "GameServer.h"
 
 
