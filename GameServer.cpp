@@ -487,7 +487,9 @@ int GameServer::GetNewGameInfo()
 			return -1;			// Abort (Failed, could not allocate space)
 
 		// Copy the old info to the new array
-		memcpy(newGameInfo, gameInfo, numGames * sizeof(GameInfo));
+		if (gameInfo != nullptr) {
+			memcpy(newGameInfo, gameInfo, numGames * sizeof(GameInfo));
+		}
 
 		// Update the array info
 		delete[] gameInfo;
