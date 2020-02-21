@@ -363,7 +363,7 @@ void GameServer::DoTimedUpdates()
 {
 	int i;
 	time_t currentTime;
-	unsigned int timeDiff;
+	time_t timeDiff;
 
 	#ifdef DEBUG
 		//LogMessage("DoTimedUpdates()");
