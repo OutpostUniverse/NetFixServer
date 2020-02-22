@@ -172,9 +172,6 @@ int GameServer::AllocSocket(SOCKET& hostSocket, unsigned short port)
 
 void GameServer::ProcessPacket(Packet &packet, sockaddr_in &from)
 {
-	unsigned int gameInfoIndex;
-	GameInfo* currentGameInfo;
-
 	#ifdef DEBUG
 		//LogMessage("ProcessPacket");
 		//LogValue("CommandType: ", packet.tlMessage.tlHeader.commandType);
@@ -183,181 +180,205 @@ void GameServer::ProcessPacket(Packet &packet, sockaddr_in &from)
 	switch(packet.tlMessage.tlHeader.commandType)
 	{
 	case tlcJoinRequest:
-		// Verify the packet size
-		if (packet.header.sizeOfPayload != sizeof(JoinRequest))
-			return;		// Discard (bad size)
-		
-		LogEndpoint("Game Join Request from: ", from.sin_addr.s_addr, from.sin_port);
-
-		packet.tlMessage.tlHeader.commandType = tlcJoinHelpRequest;
-		packet.tlMessage.joinHelpRequest.clientAddr = from;
-		packet.tlMessage.joinHelpRequest.clientAddr.sin_family = 2;		// ** AF_INET
-
-		// Search for a corresponding Session Identifer
-		for (gameInfoIndex = 0; gameInfoIndex < numGames; gameInfoIndex++)
-		{
-			// Check if the Session Identifier matches
-			if (memcmp(&gameInfo[gameInfoIndex].sessionIdentifier, &packet.tlMessage.joinRequest.sessionIdentifier, sizeof(packet.tlMessage.joinRequest.sessionIdentifier)) == 0)
-			{
-				// Send the Join Help Request
-				SendTo(packet, gameInfo[gameInfoIndex].addr);
-			}
-		}
-
+		ProcessJoinRequest(packet, from);
 		break;
 	case tlcHostedGameSearchQuery:
-		// Verify packet size
-		if (packet.header.sizeOfPayload != sizeof(HostedGameSearchQuery))
-			return;		// Discard (bad size)
-		// Verify the game identifier
-		if (packet.tlMessage.searchQuery.gameIdentifier != gameIdentifier)
-			return;		// Discard (wrong game)
-
-		LogEndpoint("Game Search Query from: ", from.sin_addr.s_addr, from.sin_port);
-
-		// Send client a list of games
-		// Setup common packet fields
-		packet.header.sizeOfPayload = sizeof(HostedGameSearchReply);
-		packet.tlMessage.tlHeader.commandType = tlcHostedGameSearchReply;
-		// Search games list for suitable games
-		unsigned int i;
-		for (i = 0; i < numGames; ++i)
-		{
-			// Make sure we have valid game data
-			if ((gameInfo[i].flags & GameInfoReceived) != 0)
-			{
-				LogString("  GameCreator: ", gameInfo[i].createGameInfo.gameCreatorName);
-
-				// Consruct a reply packet for this game
-				packet.tlMessage.searchReply.sessionIdentifier = gameInfo[i].sessionIdentifier;
-				packet.tlMessage.searchReply.createGameInfo = gameInfo[i].createGameInfo;
-				packet.tlMessage.searchReply.hostAddress = gameInfo[i].addr;
-				packet.tlMessage.searchReply.hostAddress.sin_family = 2;		// ** AF_INET
-				// Send the reply
-				SendTo(packet, from);
-			}
-		}
-
+		ProcessGameSearchQuery(packet, from);
 		break;
 	case tlcHostedGameSearchReply:
-		// Verify packet size
-		if (packet.header.sizeOfPayload != sizeof(HostedGameSearchReply))
-			return;		// Discard (bad size)
-		// Make sure we queried this server
-		gameInfoIndex = FindGameInfoServer(from, packet.tlMessage.searchReply.timeStamp);
-		if (gameInfoIndex == -1)
-			return;		// Discard (not requested or bad time stamp, possible spam or spoofing attack)
-		currentGameInfo = &gameInfo[gameInfoIndex];
-
-		LogEndpoint("Received Host Info from: ", from.sin_addr.s_addr, from.sin_port);
-
-		// Add the game to the list
-		currentGameInfo->sessionIdentifier = packet.tlMessage.searchReply.sessionIdentifier;
-		currentGameInfo->addr = from;
-		currentGameInfo->flags |= GameInfoReceived;
-		currentGameInfo->flags &= ~GameInfoExpected & ~GameInfoUpdateRetrySent;
-		currentGameInfo->createGameInfo = packet.tlMessage.searchReply.createGameInfo;
-		currentGameInfo->time = time(0);
-
+		ProcessGameSearchReply(packet, from);
 		break;
 	case tlcGameServerPoke:
-		// Verify packet size
-		if (packet.header.sizeOfPayload != sizeof(GameServerPoke))
-			return;		// Discard (bad size)
-
-		#ifdef DEBUG
-			//LogValue("Poke: ", packet.tlMessage.gameServerPoke.statusCode);
-		#endif
-
-		// Find the current GameInfo
-		gameInfoIndex = FindGameInfoClient(from, packet.tlMessage.gameServerPoke.randValue);
-
-		// Check what kind of poke this is
-		switch(packet.tlMessage.gameServerPoke.statusCode)
-		{
-		case pscGameHosted:
-			// Check if this game server is not already known
-			if (gameInfoIndex == -1)
-			{
-				// Update counters
-				counters.numNewHost++;
-				gameInfoIndex = GetNewGameInfo();	// Allocate a new record
-			}
-			// Make sure we have a record to use
-			if (gameInfoIndex == -1)
-			{
-				// Update counters
-				counters.numFailedGameInfoAllocs++;
-				return;			// Abort  (failed to allocate new record)
-			}
-			currentGameInfo = &gameInfo[gameInfoIndex];
-
-			LogEndpoint("Game Hosted from: ", from.sin_addr.s_addr, from.sin_port);
-
-			// Initialize the new record
-			currentGameInfo->addr = from;
-			currentGameInfo->clientRandValue = packet.tlMessage.gameServerPoke.randValue;
-			currentGameInfo->serverRandValue = GetNewRandValue();
-			currentGameInfo->flags |= GameInfoExpected;
-			currentGameInfo->time = time(0);
-
-			// Send a request for games
-			SendGameInfoRequest(from, currentGameInfo->serverRandValue);
-
-			// Update counters
-			counters.numGamesHosted++;
-
-			break;
-		case pscGameStarted:
-			LogEndpoint("Game Started: ", from.sin_addr.s_addr, from.sin_port);
-
-			// Remove the game from the list
-			FreeGameInfo(gameInfoIndex);
-			// Update counters
-			counters.numGamesStarted++;
-
-			break;
-		case pscGameCancelled:
-			LogEndpoint("Game Cancelled: ", from.sin_addr.s_addr, from.sin_port);
-
-			// Remove the game from the list
-			FreeGameInfo(gameInfoIndex);
-			// Update counters
-			counters.numGamesCancelled++;
-
-			break;
-		}
+		ProcessPoke(packet, from);
 		break;
 	case tlcRequestExternalAddress:
-		// Verify packet size
-		if (packet.header.sizeOfPayload != sizeof(RequestExternalAddress))
-			return;		// Discard (bad size)
-
-		// Cache the internal port being used
-		unsigned short internalPort = packet.tlMessage.requestExternalAddress.internalPort;
-
-		// Construct a reply
-		packet.header.sizeOfPayload = sizeof(EchoExternalAddress);
-		packet.tlMessage.tlHeader.commandType = tlcEchoExternalAddress;
-		packet.tlMessage.echoExternalAddress.addr = from;
-		packet.tlMessage.echoExternalAddress.replyPort = from.sin_port;
-
-		// Send first reply
-		SendTo(packet, from);
-
-		// Check if they have a different internal address
-		if (from.sin_port != internalPort)
-		{
-			// Send second reply
-			packet.tlMessage.echoExternalAddress.replyPort = internalPort;
-			from.sin_port = htons(internalPort);
-			SendTo(packet, from);
-		}
-
+		ProcessRequestExternalAddress(packet, from);
 		break;
 	}
 }
 
+void GameServer::ProcessJoinRequest(Packet& packet, const sockaddr_in& from)
+{
+	// Verify the packet size
+	if (packet.header.sizeOfPayload != sizeof(JoinRequest))
+		return;		// Discard (bad size)
+
+	LogEndpoint("Game Join Request from: ", from.sin_addr.s_addr, from.sin_port);
+
+	packet.tlMessage.tlHeader.commandType = tlcJoinHelpRequest;
+	packet.tlMessage.joinHelpRequest.clientAddr = from;
+	packet.tlMessage.joinHelpRequest.clientAddr.sin_family = 2;		// ** AF_INET
+
+	// Search for a corresponding Session Identifer
+	for (unsigned int gameInfoIndex = 0; gameInfoIndex < numGames; gameInfoIndex++)
+	{
+		// Check if the Session Identifier matches
+		if (memcmp(&gameInfo[gameInfoIndex].sessionIdentifier, &packet.tlMessage.joinRequest.sessionIdentifier, sizeof(packet.tlMessage.joinRequest.sessionIdentifier)) == 0)
+		{
+			// Send the Join Help Request
+			SendTo(packet, gameInfo[gameInfoIndex].addr);
+		}
+	}
+
+}
+
+void GameServer::ProcessGameSearchQuery(Packet& packet, sockaddr_in& from)
+{
+	// Verify packet size
+	if (packet.header.sizeOfPayload != sizeof(HostedGameSearchQuery))
+		return;		// Discard (bad size)
+	// Verify the game identifier
+	if (packet.tlMessage.searchQuery.gameIdentifier != gameIdentifier)
+		return;		// Discard (wrong game)
+
+	LogEndpoint("Game Search Query from: ", from.sin_addr.s_addr, from.sin_port);
+
+	// Send client a list of games
+	// Setup common packet fields
+	packet.header.sizeOfPayload = sizeof(HostedGameSearchReply);
+	packet.tlMessage.tlHeader.commandType = tlcHostedGameSearchReply;
+	// Search games list for suitable games
+	unsigned int i;
+	for (i = 0; i < numGames; ++i)
+	{
+		// Make sure we have valid game data
+		if ((gameInfo[i].flags & GameInfoReceived) != 0)
+		{
+			LogString("  GameCreator: ", gameInfo[i].createGameInfo.gameCreatorName);
+
+			// Consruct a reply packet for this game
+			packet.tlMessage.searchReply.sessionIdentifier = gameInfo[i].sessionIdentifier;
+			packet.tlMessage.searchReply.createGameInfo = gameInfo[i].createGameInfo;
+			packet.tlMessage.searchReply.hostAddress = gameInfo[i].addr;
+			packet.tlMessage.searchReply.hostAddress.sin_family = 2;		// ** AF_INET
+			// Send the reply
+			SendTo(packet, from);
+		}
+	}
+}
+
+void GameServer::ProcessGameSearchReply(Packet& packet, sockaddr_in& from)
+{
+	// Verify packet size
+	if (packet.header.sizeOfPayload != sizeof(HostedGameSearchReply))
+		return;		// Discard (bad size)
+	// Make sure we queried this server
+	unsigned int gameInfoIndex = FindGameInfoServer(from, packet.tlMessage.searchReply.timeStamp);
+	if (gameInfoIndex == -1)
+		return;		// Discard (not requested or bad time stamp, possible spam or spoofing attack)
+	GameInfo* currentGameInfo = &gameInfo[gameInfoIndex];
+
+	LogEndpoint("Received Host Info from: ", from.sin_addr.s_addr, from.sin_port);
+
+	// Add the game to the list
+	currentGameInfo->sessionIdentifier = packet.tlMessage.searchReply.sessionIdentifier;
+	currentGameInfo->addr = from;
+	currentGameInfo->flags |= GameInfoReceived;
+	currentGameInfo->flags &= ~GameInfoExpected & ~GameInfoUpdateRetrySent;
+	currentGameInfo->createGameInfo = packet.tlMessage.searchReply.createGameInfo;
+	currentGameInfo->time = time(0);
+
+}
+
+void GameServer::ProcessPoke(Packet& packet, sockaddr_in& from)
+{
+	// Verify packet size
+	if (packet.header.sizeOfPayload != sizeof(GameServerPoke))
+		return;		// Discard (bad size)
+
+#ifdef DEBUG
+	//LogValue("Poke: ", packet.tlMessage.gameServerPoke.statusCode);
+#endif
+
+	// Find the current GameInfo
+	unsigned int gameInfoIndex = FindGameInfoClient(from, packet.tlMessage.gameServerPoke.randValue);
+
+	// Check what kind of poke this is
+	switch (packet.tlMessage.gameServerPoke.statusCode)
+	{
+	case pscGameHosted: {
+		// Check if this game server is not already known
+		if (gameInfoIndex == -1)
+		{
+			// Update counters
+			counters.numNewHost++;
+			gameInfoIndex = GetNewGameInfo();	// Allocate a new record
+		}
+		// Make sure we have a record to use
+		if (gameInfoIndex == -1)
+		{
+			// Update counters
+			counters.numFailedGameInfoAllocs++;
+			return;			// Abort  (failed to allocate new record)
+		}
+		GameInfo* currentGameInfo = &gameInfo[gameInfoIndex];
+
+		LogEndpoint("Game Hosted from: ", from.sin_addr.s_addr, from.sin_port);
+
+		// Initialize the new record
+		currentGameInfo->addr = from;
+		currentGameInfo->clientRandValue = packet.tlMessage.gameServerPoke.randValue;
+		currentGameInfo->serverRandValue = GetNewRandValue();
+		currentGameInfo->flags |= GameInfoExpected;
+		currentGameInfo->time = time(0);
+
+		// Send a request for games
+		SendGameInfoRequest(from, currentGameInfo->serverRandValue);
+
+		// Update counters
+		counters.numGamesHosted++;
+
+		break; }
+	case pscGameStarted: {
+		LogEndpoint("Game Started: ", from.sin_addr.s_addr, from.sin_port);
+
+		// Remove the game from the list
+		FreeGameInfo(gameInfoIndex);
+		// Update counters
+		counters.numGamesStarted++;
+
+		break; }
+	case pscGameCancelled: {
+		LogEndpoint("Game Cancelled: ", from.sin_addr.s_addr, from.sin_port);
+
+		// Remove the game from the list
+		FreeGameInfo(gameInfoIndex);
+		// Update counters
+		counters.numGamesCancelled++;
+
+		break; }
+	}
+}
+
+void GameServer::ProcessRequestExternalAddress(Packet& packet, sockaddr_in& from)
+{
+	// Verify packet size
+	if (packet.header.sizeOfPayload != sizeof(RequestExternalAddress))
+		return;		// Discard (bad size)
+
+	// Cache the internal port being used
+	unsigned short internalPort = packet.tlMessage.requestExternalAddress.internalPort;
+
+	// Construct a reply
+	packet.header.sizeOfPayload = sizeof(EchoExternalAddress);
+	packet.tlMessage.tlHeader.commandType = tlcEchoExternalAddress;
+	packet.tlMessage.echoExternalAddress.addr = from;
+	packet.tlMessage.echoExternalAddress.replyPort = from.sin_port;
+
+	// Send first reply
+	SendTo(packet, from);
+
+	// Check if they have a different internal address
+	if (from.sin_port != internalPort)
+	{
+		// Send second reply
+		packet.tlMessage.echoExternalAddress.replyPort = internalPort;
+		from.sin_port = htons(internalPort);
+		SendTo(packet, from);
+	}
+
+
+}
 
 void GameServer::DoTimedUpdates()
 {

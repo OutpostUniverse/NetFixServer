@@ -76,6 +76,11 @@ private:
 	// Private functions
 	int AllocSocket(SOCKET &socket, unsigned short port);
 	void ProcessPacket(Packet &packet, sockaddr_in &from);
+	void ProcessJoinRequest(Packet& packet, const sockaddr_in& from);
+	void ProcessGameSearchQuery(Packet& packet, sockaddr_in& from);
+	void ProcessGameSearchReply(Packet& packet, sockaddr_in& from);
+	void ProcessPoke(Packet& packet, sockaddr_in& from);
+	void ProcessRequestExternalAddress(Packet& packet, sockaddr_in& from);
 	void DoTimedUpdates();
 	int FindGameInfoClient(sockaddr_in &from, unsigned int clientRandValue);
 	int FindGameInfoServer(sockaddr_in &from, unsigned int serverRandValue);
