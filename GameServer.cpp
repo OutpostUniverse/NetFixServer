@@ -1,4 +1,3 @@
-// **DEBUG**
 //#define DEBUG
 #include "ErrorLog.h"
 #include "GameServer.h"
