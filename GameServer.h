@@ -1,6 +1,4 @@
-
-#ifndef GameServer_H_Seen
-#define GameServer_H_Seen
+#pragma once
 
 
 #ifdef WIN32
@@ -134,7 +132,3 @@ private:
 		int bWinsockInitialized;
 	#endif
 };
-
-
-
-#endif
