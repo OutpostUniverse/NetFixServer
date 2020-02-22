@@ -3,26 +3,24 @@
 
 int Packet::Checksum()
 {
-	int headerChecksum;
-	int dataChecksum;
-	int i;
-	int* data = (&header.checksum)+1;
-
 	// Checksum the pre-checksum fields
-	headerChecksum = header.sourcePlayerNetID + header.destPlayerNetID;
+	int headerChecksum = header.sourcePlayerNetID + header.destPlayerNetID;
 	headerChecksum += ((int)header.sizeOfPayload | ((int)header.type << 8));
 	headerChecksum ^= 0xFDE24ACB;
+
 	// Checksum the post-checksum fields
-	dataChecksum = 0;
+	int dataChecksum = 0;
+	int* data = (&header.checksum) + 1;
+
 	// Handle DWORD at a time
-	i = header.sizeOfPayload / 4;
-	for (; i > 0; --i)
+	for (int i = header.sizeOfPayload / 4; i > 0; --i)
 	{
 		dataChecksum += *data;
 		data++;
 	}
+
 	// Checksum remaining bytes
-	i = header.sizeOfPayload & 3;
+	int i = header.sizeOfPayload & 3;
 	if (i > 0)
 	{
 		int temp = 0;
