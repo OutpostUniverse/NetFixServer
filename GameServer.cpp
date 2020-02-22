@@ -181,19 +181,19 @@ void GameServer::ProcessPacket(Packet &packet, sockaddr_in &from)
 	{
 	case tlcJoinRequest:
 		ProcessJoinRequest(packet, from);
-		break;
+		return;
 	case tlcHostedGameSearchQuery:
 		ProcessGameSearchQuery(packet, from);
-		break;
+		return;
 	case tlcHostedGameSearchReply:
 		ProcessGameSearchReply(packet, from);
-		break;
+		return;
 	case tlcGameServerPoke:
 		ProcessPoke(packet, from);
-		break;
+		return;
 	case tlcRequestExternalAddress:
 		ProcessRequestExternalAddress(packet, from);
-		break;
+		return;
 	}
 }
 
@@ -328,7 +328,7 @@ void GameServer::ProcessPoke(Packet& packet, sockaddr_in& from)
 		// Update counters
 		counters.numGamesHosted++;
 
-		break; }
+		return; }
 	case pscGameStarted: {
 		LogEndpoint("Game Started: ", from.sin_addr.s_addr, from.sin_port);
 
@@ -337,7 +337,7 @@ void GameServer::ProcessPoke(Packet& packet, sockaddr_in& from)
 		// Update counters
 		counters.numGamesStarted++;
 
-		break; }
+		return; }
 	case pscGameCancelled: {
 		LogEndpoint("Game Cancelled: ", from.sin_addr.s_addr, from.sin_port);
 
@@ -346,7 +346,7 @@ void GameServer::ProcessPoke(Packet& packet, sockaddr_in& from)
 		// Update counters
 		counters.numGamesCancelled++;
 
-		break; }
+		return; }
 	}
 }
 
