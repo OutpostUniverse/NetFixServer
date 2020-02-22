@@ -4,27 +4,27 @@
 std::ostream &logFile = std::cerr;
 
 
-void LogMessage(const char* message)
+void LogMessage(std::string_view message)
 {
 	logFile << message << std::endl;
 }
 
-void LogString(const char* message, const char* string)
+void LogString(std::string_view message, std::string_view string)
 {
 	logFile << message << string << std::endl;
 }
 
-void LogValue(const char* message, int value)
+void LogValue(std::string_view message, int value)
 {
 	logFile << message << std::dec << value << std::endl;
 }
 
-void LogValueHex(const char* message, int value)
+void LogValueHex(std::string_view message, int value)
 {
 	logFile << message << std::hex << value << std::endl;
 }
 
-void LogEndpoint(const char* message, unsigned long ipAddr, unsigned short port)
+void LogEndpoint(std::string_view message, unsigned long ipAddr, unsigned short port)
 {
 	union
 	{
