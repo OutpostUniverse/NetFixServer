@@ -6,7 +6,7 @@ OBJDIR := $(BUILDDIR)/obj
 DEPDIR := $(BUILDDIR)/deps
 OUTPUT := $(BINDIR)/netfixserver
 
-CFLAGS := -std=c++11 -g -Wall -Wno-unknown-pragmas
+CFLAGS := -std=c++17 -g -Wall -Wno-unknown-pragmas
 LDFLAGS := -lstdc++ -lm
 
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.Td
