@@ -1,6 +1,7 @@
-#include <iostream>
+#pragma once
 
 #include "GameServer.h"
+#include <iostream>
 
 
 extern std::ostream &logFile;

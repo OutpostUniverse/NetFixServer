@@ -1,7 +1,4 @@
-
-#ifndef Packet_H_Seen
-#define Packet_H_Seen
-
+#pragma once
 
 
 #ifdef WIN32
@@ -213,7 +210,4 @@ public:
 // Restore old alignment setting
 #ifdef WIN32
 #pragma pack(pop)
-#endif
-
-
 #endif

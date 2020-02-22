@@ -1,13 +1,11 @@
-// **DEBUG**
 //#define DEBUG
 #include "ErrorLog.h"
+#include "GameServer.h"
 
 #ifndef WIN32
 	#define closesocket close
 	#define ioctlsocket ioctl
 #endif
-
-#include "GameServer.h"
 
 
 const unsigned int InitialGameListSize = 64;

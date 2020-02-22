@@ -1,7 +1,7 @@
+#pragma once
 
-#ifndef GameServer_H_Seen
-#define GameServer_H_Seen
-
+#include "Packet.h"
+#include <time.h>
 
 #ifdef WIN32
 	#include <winsock2.h>
@@ -16,11 +16,6 @@
 	#define SOCKET_ERROR -1
 	#define INVALID_SOCKET -1
 #endif
-
-#include <time.h>
-
-#include "Packet.h"
-
 
 
 struct GameServerCounters
@@ -134,7 +129,3 @@ private:
 		int bWinsockInitialized;
 	#endif
 };
-
-
-
-#endif
