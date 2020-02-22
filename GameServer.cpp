@@ -326,7 +326,8 @@ void GameServer::ProcessPoke(Packet& packet, sockaddr_in& from)
 		// Update counters
 		counters.numGamesHosted++;
 
-		return; }
+		return;
+	}
 	case pscGameStarted: {
 		LogEndpoint("Game Started: ", from.sin_addr.s_addr, from.sin_port);
 
@@ -335,7 +336,8 @@ void GameServer::ProcessPoke(Packet& packet, sockaddr_in& from)
 		// Update counters
 		counters.numGamesStarted++;
 
-		return; }
+		return;
+	}
 	case pscGameCancelled: {
 		LogEndpoint("Game Cancelled: ", from.sin_addr.s_addr, from.sin_port);
 
@@ -344,7 +346,8 @@ void GameServer::ProcessPoke(Packet& packet, sockaddr_in& from)
 		// Update counters
 		counters.numGamesCancelled++;
 
-		return; }
+		return;
+	}
 	}
 }
 
@@ -374,8 +377,6 @@ void GameServer::ProcessRequestExternalAddress(Packet& packet, sockaddr_in& from
 		from.sin_port = htons(internalPort);
 		SendTo(packet, from);
 	}
-
-
 }
 
 void GameServer::DoTimedUpdates()
