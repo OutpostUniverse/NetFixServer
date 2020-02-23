@@ -49,8 +49,9 @@ void LogCounters(GameServerCounters& counters)
 	static GameServerCounters oldCounters = { 0 };
 
 	// Check if updates need to be printed
-	if (memcmp(&counters, &oldCounters, sizeof(counters)) == 0)
+	if (memcmp(&counters, &oldCounters, sizeof(counters)) == 0) {
 		return;
+	}
 
 	// Store the current counters
 	oldCounters = counters;
@@ -79,8 +80,9 @@ void LogCounters(GameServerCounters& counters)
 	static GameServerCounters oldCounters = { 0 };
 
 	// Check if updates need to be printed
-	if (memcmp(&counters, &oldCounters, sizeof(counters)) == 0)
+	if (memcmp(&counters, &oldCounters, sizeof(counters)) == 0) {
 		return;
+	}
 
 	// Store the current counters
 	oldCounters = counters;
