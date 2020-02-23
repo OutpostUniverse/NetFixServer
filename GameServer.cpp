@@ -39,14 +39,16 @@ GameServer::GameServer()
 GameServer::~GameServer()
 {
 	// Check if a socket exists
-	if (hostSocket != INVALID_SOCKET)
+	if (hostSocket != INVALID_SOCKET) {
 		closesocket(hostSocket);
+	}
 
 	// Perform Win32 specific cleanup
 	#ifdef WIN32
 		// Check if Winsock is initialized
-		if (bWinsockInitialized != false)
+		if (bWinsockInitialized != false) {
 			WSACleanup();
+		}
 	#endif
 
 	// Cleanup the games list
@@ -63,26 +65,31 @@ int GameServer::StartServer(unsigned short port)
 		// Initialize Winsock
 		errorCode = InitWinsock();
 		// Check for errors
-		if (errorCode != 0)
+		if (errorCode != 0) {
 			return errorCode;				// Error
+		}
 	#endif
 
 	// Create the host socket
 	errorCode = AllocSocket(hostSocket, port);
-	if (errorCode != NoError)
+	if (errorCode != NoError) {
 		return errorCode;
+	}
+
 	// Create the secondary socket
 	errorCode = AllocSocket(secondarySocket, port + 1);
-	if (errorCode != NoError)
+	if (errorCode != NoError) {
 		return errorCode;
+	}
 
 	// Allocate space to store games list
 	numGames = 0;
 	maxNumGames = InitialGameListSize;
 	gameInfo = new GameInfo[maxNumGames];
 	// Check for errors
-	if (gameInfo == 0)
+	if (gameInfo == 0) {
 		return AllocGameListFailed;			// Error
+	}
 
 	return NoError;							// Success
 }
@@ -98,8 +105,9 @@ void GameServer::Pump()
 	{
 		// Check for received packets
 		numBytes = ReceiveFrom(packet, from);
-		if (numBytes >= 0)
+		if (numBytes >= 0) {
 			ProcessPacket(packet, from);
+		}
 		else
 		{
 			if (numBytes != PacketNone)
@@ -114,8 +122,9 @@ void GameServer::Pump()
 		DoTimedUpdates();
 
 		// Check if we are done processing packets
-		if (numBytes == -1)
+		if (numBytes == -1) {
 			return;		// Exit
+		}
 	}
 }
 
@@ -141,8 +150,9 @@ int GameServer::AllocSocket(SOCKET& hostSocket, unsigned short port)
 	// Create the host socket
 	hostSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	// Check for errors
-	if (hostSocket == INVALID_SOCKET)
+	if (hostSocket == INVALID_SOCKET) {
 		return SocketCreateFailed;			// Error
+	}
 
 	// Bind the socket to the host port
 	sockaddr_in hostAddress;
@@ -154,15 +164,17 @@ int GameServer::AllocSocket(SOCKET& hostSocket, unsigned short port)
 	// Bind the socket
 	errorCode = bind(hostSocket, (sockaddr*)&hostAddress, sizeof(hostAddress));
 	// Check for errors
-	if (errorCode == SOCKET_ERROR)
+	if (errorCode == SOCKET_ERROR) {
 		return SocketBindFailed;			// Error
+	}
 
 	// Set non-blocking mode
 	unsigned long argp = true;
 	errorCode = ioctlsocket(hostSocket, FIONBIO, &argp);
 	// Check for errors
-	if (errorCode != 0)
+	if (errorCode != 0) {
 		return SocketNonBlockingModeFailed;	// Error
+	}
 
 	// Return success
 	return NoError;
@@ -198,8 +210,9 @@ void GameServer::ProcessPacket(Packet &packet, sockaddr_in &from)
 void GameServer::ProcessJoinRequest(Packet& packet, const sockaddr_in& from)
 {
 	// Verify the packet size
-	if (packet.header.sizeOfPayload != sizeof(JoinRequest))
+	if (packet.header.sizeOfPayload != sizeof(JoinRequest)) {
 		return;		// Discard (bad size)
+	}
 
 	LogEndpoint("Game Join Request from: ", from.sin_addr.s_addr, from.sin_port);
 
@@ -223,11 +236,13 @@ void GameServer::ProcessJoinRequest(Packet& packet, const sockaddr_in& from)
 void GameServer::ProcessGameSearchQuery(Packet& packet, sockaddr_in& from)
 {
 	// Verify packet size
-	if (packet.header.sizeOfPayload != sizeof(HostedGameSearchQuery))
+	if (packet.header.sizeOfPayload != sizeof(HostedGameSearchQuery)) {
 		return;		// Discard (bad size)
+	}
 	// Verify the game identifier
-	if (packet.tlMessage.searchQuery.gameIdentifier != gameIdentifier)
+	if (packet.tlMessage.searchQuery.gameIdentifier != gameIdentifier) {
 		return;		// Discard (wrong game)
+	}
 
 	LogEndpoint("Game Search Query from: ", from.sin_addr.s_addr, from.sin_port);
 
@@ -258,12 +273,15 @@ void GameServer::ProcessGameSearchQuery(Packet& packet, sockaddr_in& from)
 void GameServer::ProcessGameSearchReply(Packet& packet, sockaddr_in& from)
 {
 	// Verify packet size
-	if (packet.header.sizeOfPayload != sizeof(HostedGameSearchReply))
+	if (packet.header.sizeOfPayload != sizeof(HostedGameSearchReply)) {
 		return;		// Discard (bad size)
+	}
+
 	// Make sure we queried this server
 	unsigned int gameInfoIndex = FindGameInfoServer(from, packet.tlMessage.searchReply.timeStamp);
-	if (gameInfoIndex == -1)
+	if (gameInfoIndex == -1) {
 		return;		// Discard (not requested or bad time stamp, possible spam or spoofing attack)
+	}
 	GameInfo* currentGameInfo = &gameInfo[gameInfoIndex];
 
 	LogEndpoint("Received Host Info from: ", from.sin_addr.s_addr, from.sin_port);
@@ -281,8 +299,9 @@ void GameServer::ProcessGameSearchReply(Packet& packet, sockaddr_in& from)
 void GameServer::ProcessPoke(Packet& packet, sockaddr_in& from)
 {
 	// Verify packet size
-	if (packet.header.sizeOfPayload != sizeof(GameServerPoke))
+	if (packet.header.sizeOfPayload != sizeof(GameServerPoke)) {
 		return;		// Discard (bad size)
+	}
 
 #ifdef DEBUG
 	//LogValue("Poke: ", packet.tlMessage.gameServerPoke.statusCode);
@@ -354,8 +373,9 @@ void GameServer::ProcessPoke(Packet& packet, sockaddr_in& from)
 void GameServer::ProcessRequestExternalAddress(Packet& packet, sockaddr_in& from)
 {
 	// Verify packet size
-	if (packet.header.sizeOfPayload != sizeof(RequestExternalAddress))
+	if (packet.header.sizeOfPayload != sizeof(RequestExternalAddress)) {
 		return;		// Discard (bad size)
+	}
 
 	// Cache the internal port being used
 	unsigned short internalPort = packet.tlMessage.requestExternalAddress.internalPort;
@@ -503,8 +523,9 @@ int GameServer::GetNewGameInfo()
 		int newSize = maxNumGames + GrowByGameListSize;
 		GameInfo* newGameInfo = new GameInfo[newSize];
 		// Check for errors
-		if (newGameInfo == 0)
+		if (newGameInfo == 0) {
 			return -1;			// Abort (Failed, could not allocate space)
+		}
 
 		// Copy the old info to the new array
 		if (gameInfo != nullptr) {
@@ -540,8 +561,9 @@ void GameServer::FreeGameInfo(unsigned int index)
 	// Decrease game count
 	numGames--;
 	// Avoid the copy if we don't need to
-	if (index != numGames)
+	if (index != numGames) {
 		gameInfo[index] = gameInfo[numGames];	// Copy the last array element into the free space
+	}
 }
 
 
