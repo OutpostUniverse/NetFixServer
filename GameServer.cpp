@@ -532,7 +532,7 @@ void GameServer::FreeGameInfo(unsigned int index)
 	{
 		// System Error **TODO** report this
 		#ifdef DEBUG
-			LogMessage("Internal Error: Tried to free an non-existent GameInfo record");
+			LogMessage("Internal Error: Tried to free a non-existent GameInfo record");
 		#endif
 		return;		// Abort
 	}
