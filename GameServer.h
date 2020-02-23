@@ -68,7 +68,6 @@ public:
 	void WaitForEvent();
 
 private:
-	// Private functions
 	int AllocSocket(SOCKET &socket, unsigned short port);
 	void ProcessPacket(Packet &packet, sockaddr_in &from);
 	void ProcessJoinRequest(Packet& packet, const sockaddr_in& from);
@@ -90,8 +89,6 @@ private:
 		int InitWinsock();
 	#endif
 
-private:
-	// Private data definitions
 	struct GameInfo
 	{
 		GUID sessionIdentifier;
@@ -122,7 +119,6 @@ private:
 		PacketChecksumBad = -5,
 	};
 
-	// Private member variables
 	SOCKET hostSocket;
 	SOCKET secondarySocket;
 	GameInfo* gameInfo;

@@ -33,10 +33,9 @@ int main(int argc, char **argv)
 		}
 	}
 
-	// Start the game server
 	GameServer gameServer;
 	int errorCode = gameServer.StartServer(portNum);
-	// Check for errors
+
 	if (errorCode != 0)
 	{
 		LogMessage("Game Server failed to start");

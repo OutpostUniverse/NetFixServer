@@ -50,12 +50,6 @@ struct StartupFlags
 #endif
 
 
-// ----------------------------------------
-
-// ------
-// Header
-// ------
-
 struct PacketHeader
 {
 	int sourcePlayerNetID Pack;
@@ -64,7 +58,6 @@ struct PacketHeader
 	unsigned char type;
 	int checksum Pack;
 };
-
 
 
 // ------------------------
@@ -83,8 +76,6 @@ enum TransportLayerCommandType
 };
 
 
-// ----------------------------------------
-
 // ---------------
 // Payload formats
 // ---------------
@@ -93,9 +84,6 @@ struct TransportLayerHeader
 {
 	TransportLayerCommandType commandType Pack;
 };
-
-
-// ----------------------------------------
 
 
 struct JoinRequest : public TransportLayerHeader
@@ -167,8 +155,6 @@ struct EchoExternalAddress : public TransportLayerHeader
 };
 
 
-// ----------------------------------------
-
 union TransportLayerMessage
 {
 	// Header only
@@ -185,8 +171,6 @@ union TransportLayerMessage
 };
 
 
-// ----------------------------------------
-
 // ------
 // Packet
 // ------
@@ -194,15 +178,12 @@ union TransportLayerMessage
 class Packet
 {
 public:
-	// Member variables
 	PacketHeader header;
 	union
 	{
 		TransportLayerMessage tlMessage;
 	};
 
-public:
-	// Member functions
 	int Checksum();
 };
 
