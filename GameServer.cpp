@@ -1,4 +1,3 @@
-//#define DEBUG
 #include "ErrorLog.h"
 #include "GameServer.h"
 
@@ -62,11 +61,10 @@ int GameServer::StartServer(unsigned short port)
 	int errorCode;
 
 	#ifdef WIN32
-		// Initialize Winsock
 		errorCode = InitWinsock();
 		// Check for errors
 		if (errorCode != 0) {
-			return errorCode;				// Error
+			return errorCode;
 		}
 	#endif
 
@@ -86,12 +84,12 @@ int GameServer::StartServer(unsigned short port)
 	numGames = 0;
 	maxNumGames = InitialGameListSize;
 	gameInfo = new GameInfo[maxNumGames];
-	// Check for errors
+
 	if (gameInfo == 0) {
-		return AllocGameListFailed;			// Error
+		return AllocGameListFailed;
 	}
 
-	return NoError;							// Success
+	return NoError;
 }
 
 void GameServer::Pump()
@@ -123,7 +121,7 @@ void GameServer::Pump()
 
 		// Check if we are done processing packets
 		if (numBytes == -1) {
-			return;		// Exit
+			return;
 		}
 	}
 }
@@ -149,9 +147,9 @@ int GameServer::AllocSocket(SOCKET& hostSocket, unsigned short port)
 
 	// Create the host socket
 	hostSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-	// Check for errors
+
 	if (hostSocket == INVALID_SOCKET) {
-		return SocketCreateFailed;			// Error
+		return SocketCreateFailed;
 	}
 
 	// Bind the socket to the host port
@@ -163,20 +161,19 @@ int GameServer::AllocSocket(SOCKET& hostSocket, unsigned short port)
 	hostAddress.sin_addr.s_addr = INADDR_ANY;
 	// Bind the socket
 	errorCode = bind(hostSocket, (sockaddr*)&hostAddress, sizeof(hostAddress));
-	// Check for errors
+
 	if (errorCode == SOCKET_ERROR) {
-		return SocketBindFailed;			// Error
+		return SocketBindFailed;
 	}
 
 	// Set non-blocking mode
 	unsigned long argp = true;
 	errorCode = ioctlsocket(hostSocket, FIONBIO, &argp);
-	// Check for errors
+
 	if (errorCode != 0) {
-		return SocketNonBlockingModeFailed;	// Error
+		return SocketNonBlockingModeFailed;
 	}
 
-	// Return success
 	return NoError;
 }
 
@@ -293,7 +290,6 @@ void GameServer::ProcessGameSearchReply(Packet& packet, sockaddr_in& from)
 	currentGameInfo->flags &= ~GameInfoExpected & ~GameInfoUpdateRetrySent;
 	currentGameInfo->createGameInfo = packet.tlMessage.searchReply.createGameInfo;
 	currentGameInfo->time = time(0);
-
 }
 
 void GameServer::ProcessPoke(Packet& packet, sockaddr_in& from)
@@ -317,14 +313,12 @@ void GameServer::ProcessPoke(Packet& packet, sockaddr_in& from)
 		// Check if this game server is not already known
 		if (gameInfoIndex == -1)
 		{
-			// Update counters
 			counters.numNewHost++;
 			gameInfoIndex = GetNewGameInfo();	// Allocate a new record
 		}
 		// Make sure we have a record to use
 		if (gameInfoIndex == -1)
 		{
-			// Update counters
 			counters.numFailedGameInfoAllocs++;
 			return;			// Abort  (failed to allocate new record)
 		}
@@ -352,7 +346,6 @@ void GameServer::ProcessPoke(Packet& packet, sockaddr_in& from)
 
 		// Remove the game from the list
 		FreeGameInfo(gameInfoIndex);
-		// Update counters
 		counters.numGamesStarted++;
 
 		return;
@@ -362,7 +355,6 @@ void GameServer::ProcessPoke(Packet& packet, sockaddr_in& from)
 
 		// Remove the game from the list
 		FreeGameInfo(gameInfoIndex);
-		// Update counters
 		counters.numGamesCancelled++;
 
 		return;
@@ -440,7 +432,6 @@ void GameServer::DoTimedUpdates()
 
 				// Give up
 				FreeGameInfo(i);
-				// Update counters
 				counters.numGamesDropped++;
 			}
 			else if ((gameInfo[i].flags & GameInfoExpected) == 0)
@@ -449,9 +440,7 @@ void GameServer::DoTimedUpdates()
 
 				// Game info is stale, request update
 				SendGameInfoRequest(gameInfo[i].addr, gameInfo[i].serverRandValue);
-				// Update flags
 				gameInfo[i].flags |= GameInfoExpected;
-				// Update counters
 				counters.numUpdateRequestSent++;
 			}
 			else if ((timeDiff >= RetryTime) && ((gameInfo[i].flags & GameInfoUpdateRetrySent) == 0))
@@ -460,9 +449,7 @@ void GameServer::DoTimedUpdates()
 
 				// Assume the packet was dropped. Retry.
 				SendGameInfoRequest(gameInfo[i].addr, gameInfo[i].serverRandValue);
-				// Update flags
 				gameInfo[i].flags |= GameInfoUpdateRetrySent;
-				// Update counters
 				counters.numRetrySent++;
 			}
 		}
@@ -470,7 +457,6 @@ void GameServer::DoTimedUpdates()
 
 	// Check if we should reduce memory usage **TODO**
 
-	// Output Log Info
 	LogCounters(counters);
 }
 
@@ -555,10 +541,9 @@ void GameServer::FreeGameInfo(unsigned int index)
 		#ifdef DEBUG
 			LogMessage("Internal Error: Tried to free a non-existent GameInfo record");
 		#endif
-		return;		// Abort
+		return;
 	}
 
-	// Decrease game count
 	numGames--;
 	// Avoid the copy if we don't need to
 	if (index != numGames) {
@@ -580,13 +565,12 @@ int GameServer::ReceiveFrom(Packet &packet, sockaddr_in &from)
 
 	// Read any received packets
 	numBytes = recvfrom(hostSocket, (char*)&packet, sizeof(packet), 0, (sockaddr*)&from, &addrLen);
-	// Check for errors
+
 	if (numBytes == SOCKET_ERROR)
 	{
 		// Try the secondary socket
 		numBytes = recvfrom(secondarySocket, (char*)&packet, sizeof(packet), 0, (sockaddr*)&from, &addrLen);
 
-		// Check for errors
 		if (numBytes == SOCKET_ERROR)
 		{
 			// Check if not a would block error **TODO**
@@ -628,7 +612,6 @@ int GameServer::ReceiveFrom(Packet &packet, sockaddr_in &from)
 		//LogMessage("Received packet passes all common tests");
 	#endif
 
-	// Update counters
 	counters.numPacketsReceived++;
 	counters.numBytesReceived += numBytes;
 
@@ -648,7 +631,6 @@ void GameServer::SendTo(Packet &packet, sockaddr_in &to)
 	// Send the packet
 	errorCode = sendto(hostSocket, (char*)&packet, size, 0, (sockaddr*)&to, toLen);
 
-	// Check for errors
 	if (errorCode == SOCKET_ERROR)
 	{
 		// Error  **TODO** Update counters
@@ -658,7 +640,6 @@ void GameServer::SendTo(Packet &packet, sockaddr_in &to)
 	}
 	else
 	{
-		// Success.  Update counters
 		counters.numPacketsSent++;
 		counters.numBytesSent += size;
 	}
@@ -700,7 +681,7 @@ void GameServer::SendGameInfoRequest(sockaddr_in &to, unsigned int serverRandVal
 
 		// Initialize Winsock
 		errorCode = WSAStartup(version, &wsaData);
-		// Check for success
+
 		if (errorCode == 0)
 		{
 			// Check if we got the right version
@@ -714,7 +695,6 @@ void GameServer::SendGameInfoRequest(sockaddr_in &to, unsigned int serverRandVal
 
 		// Winsock Initialized successfully
 		bWinsockInitialized = true;
-		return NoError;							// Success
+		return NoError;
 	}
 #endif
-
