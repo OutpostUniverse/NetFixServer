@@ -1,7 +1,7 @@
 #include "ErrorLog.h"
 
 
-std::ostream &logFile = std::cerr;
+std::ostream& logFile = std::cerr;
 
 
 void LogMessage(const char* message)
@@ -44,7 +44,7 @@ void LogEndpoint(const char* message, unsigned long ipAddr, unsigned short port)
 			<< ":" << port << std::endl;
 }
 
-void LogCounters(GameServerCounters &counters)
+void LogCounters(GameServerCounters& counters)
 {
 	static GameServerCounters oldCounters = { 0 };
 
@@ -74,7 +74,7 @@ void LogCounters(GameServerCounters &counters)
 
 
 /*
-void LogCounters(GameServerCounters &counters)
+void LogCounters(GameServerCounters& counters)
 {
 	static GameServerCounters oldCounters = { 0 };
 

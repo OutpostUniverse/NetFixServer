@@ -10,4 +10,4 @@ void LogValue(const char* message, int value);
 void LogValueHex(const char* message, int value);
 void LogEndpoint(const char* message, unsigned long ipAddr, unsigned short port);
 
-void LogCounters(GameServerCounters &counters);
+void LogCounters(GameServerCounters& counters);
