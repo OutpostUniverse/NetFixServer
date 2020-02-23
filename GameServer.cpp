@@ -14,7 +14,7 @@ const unsigned int UpdateTime = 60;			// Number of seconds before requesting upd
 const unsigned int RetryTime = 64;			// Number of seconds before requesting update retry
 const unsigned int GiveUpTime = 68;			// Number of seconds before clearing dead entries
 const unsigned int InitialReplyTime = 4;	// Number of seconds allowed for first update
-const GUID gameIdentifier = { 0x5A55CF11, 0xB841, 0x11CE, 0x92, 0x10, 0x00, 0xAA, 0x00, 0x6C, 0x49, 0x72 };
+const GUID gameIdentifier = { 0x5A55CF11, 0xB841, 0x11CE, {0x92, 0x10, 0x00, 0xAA, 0x00, 0x6C, 0x49, 0x72} };
 
 
 
