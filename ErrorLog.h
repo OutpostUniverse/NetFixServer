@@ -4,9 +4,6 @@
 #include <iostream>
 
 
-extern std::ostream &logFile;
-
-
 void LogMessage(const char* message);
 void LogString(const char* message, const char* string);
 void LogValue(const char* message, int value);
