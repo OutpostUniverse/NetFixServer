@@ -1,7 +1,7 @@
+#pragma once
 
-#ifndef GameServer_H_Seen
-#define GameServer_H_Seen
-
+#include "Packet.h"
+#include <time.h>
 
 #ifdef WIN32
 	#include <winsock2.h>
@@ -16,11 +16,6 @@
 	#define SOCKET_ERROR -1
 	#define INVALID_SOCKET -1
 #endif
-
-#include <time.h>
-
-#include "Packet.h"
-
 
 
 struct GameServerCounters
@@ -76,6 +71,11 @@ private:
 	// Private functions
 	int AllocSocket(SOCKET &socket, unsigned short port);
 	void ProcessPacket(Packet &packet, sockaddr_in &from);
+	void ProcessJoinRequest(Packet& packet, const sockaddr_in& from);
+	void ProcessGameSearchQuery(Packet& packet, sockaddr_in& from);
+	void ProcessGameSearchReply(Packet& packet, sockaddr_in& from);
+	void ProcessPoke(Packet& packet, sockaddr_in& from);
+	void ProcessRequestExternalAddress(Packet& packet, sockaddr_in& from);
 	void DoTimedUpdates();
 	int FindGameInfoClient(sockaddr_in &from, unsigned int clientRandValue);
 	int FindGameInfoServer(sockaddr_in &from, unsigned int serverRandValue);
@@ -134,7 +134,3 @@ private:
 		int bWinsockInitialized;
 	#endif
 };
-
-
-
-#endif

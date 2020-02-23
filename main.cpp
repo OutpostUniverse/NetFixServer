@@ -21,15 +21,11 @@ const char PortNumParam[] = "PortNum=";
 
 int main(int argc, char **argv)
 {
-	int errorCode;
-	GameServer gameServer;
 	int portNum = 47800;
-	int stringLen;
-	int i;
 
-	stringLen = strlen(PortNumParam);
+	int stringLen = strlen(PortNumParam);
 	// Check for command line parameters
-	for (i = 0; i < argc; i++)
+	for (int i = 0; i < argc; i++)
 	{
 		if (strncmp(argv[i], PortNumParam, stringLen) == 0)
 		{
@@ -38,7 +34,8 @@ int main(int argc, char **argv)
 	}
 
 	// Start the game server
-	errorCode = gameServer.StartServer(portNum);
+	GameServer gameServer;
+	int errorCode = gameServer.StartServer(portNum);
 	// Check for errors
 	if (errorCode != 0)
 	{

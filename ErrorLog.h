@@ -1,6 +1,7 @@
-#include <iostream>
+#pragma once
 
 #include "GameServer.h"
+#include <iostream>
 
 
 #include <string_view>
