@@ -17,7 +17,7 @@
 		unsigned short Data3;
 		unsigned char Data4[8];
 
-		bool operator != (GUID &guid)
+		bool operator != (const GUID &guid) const
 		{
 			return (memcmp(this, &guid, sizeof(guid)) != 0);
 		}
