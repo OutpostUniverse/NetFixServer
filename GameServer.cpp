@@ -404,7 +404,7 @@ void GameServer::DoTimedUpdates()
 	// Get the current time
 	currentTime = time(0);
 	// Check for timed out game entries
-	for (std::size_t i = numGames - 1; i != (std::numeric_limits<std::size_t>::max)(); --i)
+	for (std::size_t i = numGames; i-- > 0; )
 	{
 		// Get the current time difference
 		timeDiff = currentTime - gameInfo[i].time;
