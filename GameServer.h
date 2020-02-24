@@ -2,6 +2,7 @@
 
 #include "Packet.h"
 #include <time.h>
+#include <cstddef>
 
 #ifdef WIN32
 	#include <winsock2.h>
@@ -76,10 +77,10 @@ private:
 	void ProcessPoke(Packet& packet, sockaddr_in& from);
 	void ProcessRequestExternalAddress(Packet& packet, sockaddr_in& from);
 	void DoTimedUpdates();
-	int FindGameInfoClient(sockaddr_in &from, unsigned int clientRandValue);
-	int FindGameInfoServer(sockaddr_in &from, unsigned int serverRandValue);
+	std::size_t FindGameInfoClient(sockaddr_in &from, unsigned int clientRandValue);
+	std::size_t FindGameInfoServer(sockaddr_in &from, unsigned int serverRandValue);
 	int GetNewGameInfo();
-	void FreeGameInfo(unsigned int index);
+	void FreeGameInfo(std::size_t index);
 	unsigned int GetNewRandValue();
 	int ReceiveFrom(Packet &packet, sockaddr_in &from);
 	void SendTo(Packet &packet, sockaddr_in &to);
