@@ -460,7 +460,7 @@ void GameServer::DoTimedUpdates()
 	LogCounters(counters);
 }
 
-std::size_t GameServer::FindGameInfoClient(sockaddr_in &from, unsigned int clientRandValue)
+std::size_t GameServer::FindGameInfoClient(const sockaddr_in &from, unsigned int clientRandValue)
 {
 	// Search games list
 	for (std::size_t i = 0; i < numGames; ++i)
@@ -478,7 +478,7 @@ std::size_t GameServer::FindGameInfoClient(sockaddr_in &from, unsigned int clien
 }
 
 
-std::size_t GameServer::FindGameInfoServer(sockaddr_in &from, unsigned int serverRandValue)
+std::size_t GameServer::FindGameInfoServer(const sockaddr_in &from, unsigned int serverRandValue)
 {
 	// Search games list
 	for (std::size_t i = 0; i < numGames; ++i)

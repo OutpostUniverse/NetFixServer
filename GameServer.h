@@ -77,8 +77,8 @@ private:
 	void ProcessPoke(Packet& packet, sockaddr_in& from);
 	void ProcessRequestExternalAddress(Packet& packet, sockaddr_in& from);
 	void DoTimedUpdates();
-	std::size_t FindGameInfoClient(sockaddr_in &from, unsigned int clientRandValue);
-	std::size_t FindGameInfoServer(sockaddr_in &from, unsigned int serverRandValue);
+	std::size_t FindGameInfoClient(const sockaddr_in &from, unsigned int clientRandValue);
+	std::size_t FindGameInfoServer(const sockaddr_in &from, unsigned int serverRandValue);
 	int GetNewGameInfo();
 	void FreeGameInfo(std::size_t index);
 	unsigned int GetNewRandValue();
