@@ -3,6 +3,7 @@
 #include "Packet.h"
 #include <time.h>
 #include <cstddef>
+#include <functional>
 
 #ifdef WIN32
 	#include <winsock2.h>
@@ -108,6 +109,7 @@ private:
 	void DoTimedUpdates();
 	std::size_t FindGameInfoClient(const sockaddr_in& from, unsigned int clientRandValue);
 	std::size_t FindGameInfoServer(const sockaddr_in& from, unsigned int serverRandValue);
+	std::size_t FindGameInfo(const sockaddr_in& from, const std::function <bool(const GameInfo&)>& compareFunction);
 	int GetNewGameInfo();
 	void FreeGameInfo(std::size_t index);
 	unsigned int GetNewRandValue();

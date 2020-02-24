@@ -462,31 +462,25 @@ void GameServer::DoTimedUpdates()
 
 std::size_t GameServer::FindGameInfoClient(const sockaddr_in &from, unsigned int clientRandValue)
 {
-	// Search games list
-	for (std::size_t i = 0; i < numGames; ++i)
-	{
-		// Check if this address matches
-		if ((gameInfo[i].clientRandValue == clientRandValue) && (memcmp(&gameInfo[i].addr, &from, sizeof(sockaddr_in)) == 0))
-		{
-			// Return the GameInfo
-			return i;
-		}
-	}
-
-	// GameInfo not found
-	return InvalidGameInfoIndex;
+	return FindGameInfo(from,
+		[clientRandValue](const GameInfo& gameInfo) {return gameInfo.serverRandValue == clientRandValue; }
+	);
 }
-
 
 std::size_t GameServer::FindGameInfoServer(const sockaddr_in &from, unsigned int serverRandValue)
 {
-	// Search games list
+	return FindGameInfo(from, 
+		[serverRandValue](const GameInfo& gameInfo) {return gameInfo.serverRandValue == serverRandValue; }
+	);
+}
+
+std::size_t GameServer::FindGameInfo(const sockaddr_in& from, const std::function <bool(const GameInfo&)>& compareFunction)
+{
 	for (std::size_t i = 0; i < numGames; ++i)
 	{
 		// Check if this address matches
-		if ((gameInfo[i].serverRandValue == serverRandValue) && (memcmp(&gameInfo[i].addr, &from, sizeof(sockaddr_in)) == 0))
+		if (compareFunction(gameInfo[i]) && (memcmp(&gameInfo[i].addr, &from, sizeof(sockaddr_in)) == 0))
 		{
-			// Return the GameInfo
 			return i;
 		}
 	}
