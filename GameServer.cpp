@@ -553,7 +553,7 @@ unsigned int GameServer::GetNewRandValue()
 }
 
 
-int GameServer::ReceiveFrom(Packet &packet, sockaddr_in &from)
+int GameServer::ReceiveFrom(Packet &packet, const sockaddr_in &from)
 {
 	socklen_t addrLen = sizeof(from);
 

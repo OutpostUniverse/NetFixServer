@@ -82,7 +82,7 @@ private:
 	int GetNewGameInfo();
 	void FreeGameInfo(std::size_t index);
 	unsigned int GetNewRandValue();
-	int ReceiveFrom(Packet &packet, sockaddr_in &from);
+	int ReceiveFrom(Packet &packet, const sockaddr_in &from);
 	void SendTo(Packet &packet, sockaddr_in &to);
 	void SendGameInfoRequest(sockaddr_in &to, unsigned int serverRandValue);
 	// Win32 specific functions
