@@ -203,6 +203,11 @@ void GameServer::ProcessPacket(Packet &packet, sockaddr_in &from)
 	case tlcRequestExternalAddress:
 		ProcessRequestExternalAddress(packet, from);
 		return;
+	// Message types not relevant to the game server
+	// Unused messages included to prevent GCC-8 case label warning
+	case tlcJoinHelpRequest:
+	case tlcEchoExternalAddress:
+		return;
 	}
 }
 
