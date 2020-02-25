@@ -555,11 +555,10 @@ unsigned int GameServer::GetNewRandValue()
 
 int GameServer::ReceiveFrom(Packet &packet, sockaddr_in &from)
 {
-	int numBytes;
 	socklen_t addrLen = sizeof(from);
 
 	// Read any received packets
-	numBytes = recvfrom(hostSocket, (char*)&packet, sizeof(packet), 0, (sockaddr*)&from, &addrLen);
+	int numBytes = recvfrom(hostSocket, (char*)&packet, sizeof(packet), 0, (sockaddr*)&from, &addrLen);
 
 	if (numBytes == SOCKET_ERROR)
 	{
