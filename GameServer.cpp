@@ -555,7 +555,7 @@ unsigned int GameServer::GetNewRandValue()
 
 int GameServer::ReceiveFrom(Packet &packet, sockaddr_in &from)
 {
-	unsigned int numBytes;
+	int numBytes;
 	socklen_t addrLen = sizeof(from);
 
 	// Read any received packets
