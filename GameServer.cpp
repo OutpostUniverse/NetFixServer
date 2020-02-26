@@ -145,8 +145,6 @@ void GameServer::WaitForEvent()
 
 int GameServer::AllocSocket(SOCKET& hostSocket, unsigned short port)
 {
-	int errorCode;
-
 	// Create the host socket
 	hostSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
@@ -162,7 +160,7 @@ int GameServer::AllocSocket(SOCKET& hostSocket, unsigned short port)
 	hostAddress.sin_port = htons(port);
 	hostAddress.sin_addr.s_addr = INADDR_ANY;
 	// Bind the socket
-	errorCode = bind(hostSocket, (sockaddr*)&hostAddress, sizeof(hostAddress));
+	int errorCode = bind(hostSocket, (sockaddr*)&hostAddress, sizeof(hostAddress));
 
 	if (errorCode == SOCKET_ERROR) {
 		return SocketBindFailed;
@@ -399,20 +397,17 @@ void GameServer::ProcessRequestExternalAddress(Packet& packet, sockaddr_in& from
 
 void GameServer::DoTimedUpdates()
 {
-	time_t currentTime;
-	time_t timeDiff;
-
 	#ifdef DEBUG
 		//LogMessage("DoTimedUpdates()");
 	#endif
 
 	// Get the current time
-	currentTime = time(0);
+	time_t currentTime = time(0);
 	// Check for timed out game entries
 	for (std::size_t i = numGames; i-- > 0; )
 	{
 		// Get the current time difference
-		timeDiff = currentTime - gameInfo[i].time;
+		time_t timeDiff = currentTime - gameInfo[i].time;
 
 		// Check for no initial update within required time
 		if ((timeDiff >= InitialReplyTime) && ((gameInfo[i].flags & GameInfoReceived) == 0))
