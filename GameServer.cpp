@@ -537,10 +537,7 @@ void GameServer::FreeGameInfo(std::size_t index)
 	// Make sure it's a valid index
 	if (index >= numGames)
 	{
-		// System Error **TODO** report this
-		#ifdef DEBUG
-			LogMessage("Internal Error: Tried to free a non-existent GameInfo record");
-		#endif
+		LogMessage("Internal Error: Tried to free a non-existent GameInfo record");
 		return;
 	}
 
