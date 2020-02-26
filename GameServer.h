@@ -69,27 +69,6 @@ public:
 	void WaitForEvent();
 
 private:
-	int AllocSocket(SOCKET &socket, unsigned short port);
-	void ProcessPacket(Packet &packet, sockaddr_in &from);
-	void ProcessJoinRequest(Packet& packet, const sockaddr_in& from);
-	void ProcessGameSearchQuery(Packet& packet, sockaddr_in& from);
-	void ProcessGameSearchReply(Packet& packet, sockaddr_in& from);
-	void ProcessPoke(Packet& packet, sockaddr_in& from);
-	void ProcessRequestExternalAddress(Packet& packet, sockaddr_in& from);
-	void DoTimedUpdates();
-	std::size_t FindGameInfoClient(sockaddr_in &from, unsigned int clientRandValue);
-	std::size_t FindGameInfoServer(sockaddr_in &from, unsigned int serverRandValue);
-	int GetNewGameInfo();
-	void FreeGameInfo(std::size_t index);
-	unsigned int GetNewRandValue();
-	int ReceiveFrom(Packet &packet, sockaddr_in &from);
-	void SendTo(Packet &packet, sockaddr_in &to);
-	void SendGameInfoRequest(sockaddr_in &to, unsigned int serverRandValue);
-	// Win32 specific functions
-	#ifdef WIN32
-		int InitWinsock();
-	#endif
-
 	struct GameInfo
 	{
 		GUID sessionIdentifier;
@@ -100,7 +79,6 @@ private:
 		unsigned int flags;
 		CreateGameInfo createGameInfo;
 	};
-
 
 	enum GameServerGameFlags
 	{
@@ -119,6 +97,27 @@ private:
 		PacketTypeBad = -4,
 		PacketChecksumBad = -5,
 	};
+
+	int AllocSocket(SOCKET& socket, unsigned short port);
+	void ProcessPacket(Packet& packet, sockaddr_in& from);
+	void ProcessJoinRequest(Packet& packet, const sockaddr_in& from);
+	void ProcessGameSearchQuery(Packet& packet, sockaddr_in& from);
+	void ProcessGameSearchReply(Packet& packet, sockaddr_in& from);
+	void ProcessPoke(Packet& packet, sockaddr_in& from);
+	void ProcessRequestExternalAddress(Packet& packet, sockaddr_in& from);
+	void DoTimedUpdates();
+	std::size_t FindGameInfoClient(const sockaddr_in& from, unsigned int clientRandValue);
+	std::size_t FindGameInfoServer(const sockaddr_in& from, unsigned int serverRandValue);
+	int GetNewGameInfo();
+	void FreeGameInfo(std::size_t index);
+	unsigned int GetNewRandValue();
+	int ReceiveFrom(Packet& packet, sockaddr_in& from);
+	void SendTo(Packet& packet, sockaddr_in& to);
+	void SendGameInfoRequest(sockaddr_in& to, unsigned int serverRandValue);
+	// Win32 specific functions
+#ifdef WIN32
+	int InitWinsock();
+#endif
 
 	SOCKET hostSocket;
 	SOCKET secondarySocket;
