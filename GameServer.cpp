@@ -560,17 +560,12 @@ unsigned int GameServer::GetNewRandValue()
 
 int GameServer::ReceiveFrom(Packet &packet, const sockaddr_in &from)
 {
-	socklen_t addrLen = sizeof(from);
-
 	// Read any received packets
-	int numBytes = recvfrom(hostSocket, (char*)&packet, sizeof(packet), 0, (sockaddr*)&from, &addrLen);
+	std::size_t numBytes;
 
-	if (numBytes == SOCKET_ERROR)
+	if (!ReadSocketData(numBytes, hostSocket, packet, from))
 	{
-		// Try the secondary socket
-		numBytes = recvfrom(secondarySocket, (char*)&packet, sizeof(packet), 0, (sockaddr*)&from, &addrLen);
-
-		if (numBytes == SOCKET_ERROR)
+		if (!ReadSocketData(numBytes, secondarySocket, packet, from))
 		{
 			// Check if not a would block error **TODO**
 			return PacketNone;				// No Packet (would block)
@@ -617,6 +612,23 @@ int GameServer::ReceiveFrom(Packet &packet, const sockaddr_in &from)
 	return numBytes;
 }
 
+// Hide implementation details of recvfrom library function
+// On failure, byteCountOut is set to 0. Returns false is SOCKET_ERROR encountered.
+bool GameServer::ReadSocketData(std::size_t& byteCountOut, SOCKET& socket, Packet& packetBuffer, const sockaddr_in& from)
+{
+	socklen_t addrLen = sizeof(from);
+
+	// recvfrom's return type is different on MSVC (int) and Linux (ssize_t) compilations
+	auto byteCount = recvfrom(socket, (char*)&packetBuffer, sizeof(packetBuffer), 0, (sockaddr*)&from, &addrLen);
+
+	if (byteCount == SOCKET_ERROR) {
+		byteCountOut = 0u;
+		return false;
+	}
+
+	byteCountOut = static_cast<std::size_t>(byteCount);
+	return true;
+}
 
 void GameServer::SendTo(Packet &packet, sockaddr_in &to)
 {
