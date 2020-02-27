@@ -23,8 +23,6 @@ GameServer::GameServer()
 {
 	// Initialize network socket descriptor
 	hostSocket = INVALID_SOCKET;
-	// Initialize GameInfo list pointer
-	gameInfo = 0;
 	numGames = 0;
 	maxNumGames = 0;
 	// Clear counters
@@ -51,9 +49,6 @@ GameServer::~GameServer()
 			WSACleanup();
 		}
 	#endif
-
-	// Cleanup the games list
-	delete[] gameInfo;
 }
 
 
@@ -85,11 +80,7 @@ int GameServer::StartServer(unsigned short port)
 	// Allocate space to store games list
 	numGames = 0;
 	maxNumGames = InitialGameListSize;
-	gameInfo = new GameInfo[maxNumGames];
-
-	if (gameInfo == 0) {
-		return AllocGameListFailed;
-	}
+	gameInfo.clear();
 
 	return NoError;
 }
@@ -497,32 +488,11 @@ std::size_t GameServer::FindGameInfoServer(const sockaddr_in &from, unsigned int
 
 int GameServer::GetNewGameInfo()
 {
-	// Check if we need to allocate more space
-	if ((gameInfo == 0) || (numGames >= maxNumGames))
-	{
-		// Allocate more space
-		int newSize = maxNumGames + GrowByGameListSize;
-		GameInfo* newGameInfo = new GameInfo[newSize];
-		// Check for errors
-		if (newGameInfo == 0) {
-			return -1;			// Abort (Failed, could not allocate space)
-		}
-
-		// Copy the old info to the new array
-		if (gameInfo != nullptr) {
-			memcpy(newGameInfo, gameInfo, numGames * sizeof(GameInfo));
-		}
-
-		// Update the array info
-		delete[] gameInfo;
-		gameInfo = newGameInfo;
-		maxNumGames = newSize;
-	}
+	gameInfo.push_back(GameInfo());
 
 	// Clear the flags of the new entry
-	gameInfo[numGames].flags = 0;
+	gameInfo[gameInfo.size() - 1].flags = 0;
 
-	// Return the next free entry (and increment count)
 	return numGames++;
 }
 
@@ -536,11 +506,9 @@ void GameServer::FreeGameInfo(std::size_t index)
 		return;
 	}
 
+	gameInfo.erase(gameInfo.begin() + index);
+
 	numGames--;
-	// Avoid the copy if we don't need to
-	if (index != numGames) {
-		gameInfo[index] = gameInfo[numGames];	// Copy the last array element into the free space
-	}
 }
 
 

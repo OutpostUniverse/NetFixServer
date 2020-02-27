@@ -3,6 +3,7 @@
 #include "Packet.h"
 #include <time.h>
 #include <cstddef>
+#include <vector>
 
 #ifdef WIN32
 	#include <winsock2.h>
@@ -54,7 +55,6 @@ enum GameServerErrorCode
 	SocketCreateFailed,
 	SocketBindFailed,
 	SocketNonBlockingModeFailed,
-	AllocGameListFailed,
 };
 
 
@@ -122,7 +122,7 @@ private:
 
 	SOCKET hostSocket;
 	SOCKET secondarySocket;
-	GameInfo* gameInfo;
+	std::vector<GameInfo> gameInfo;
 	unsigned int numGames;
 	unsigned int maxNumGames;
 	GameServerCounters counters;
