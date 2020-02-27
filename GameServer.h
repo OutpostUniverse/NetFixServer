@@ -123,8 +123,6 @@ private:
 	SOCKET hostSocket;
 	SOCKET secondarySocket;
 	std::vector<GameInfo> gameInfo;
-	unsigned int numGames;
-	unsigned int maxNumGames;
 	GameServerCounters counters;
 	// Win32 specific data
 	#ifdef WIN32

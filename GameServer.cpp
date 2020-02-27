@@ -9,8 +9,6 @@
 
 constexpr std::size_t InvalidGameInfoIndex = (std::numeric_limits<std::size_t>::max)();
 
-const unsigned int InitialGameListSize = 64;
-const unsigned int GrowByGameListSize = 32;
 const unsigned int UpdateTime = 60;			// Number of seconds before requesting update
 const unsigned int RetryTime = 64;			// Number of seconds before requesting update retry
 const unsigned int GiveUpTime = 68;			// Number of seconds before clearing dead entries
@@ -23,8 +21,7 @@ GameServer::GameServer()
 {
 	// Initialize network socket descriptor
 	hostSocket = INVALID_SOCKET;
-	numGames = 0;
-	maxNumGames = 0;
+
 	// Clear counters
 	memset(&counters, 0, sizeof(counters));
 
@@ -77,9 +74,6 @@ int GameServer::StartServer(unsigned short port)
 		return errorCode;
 	}
 
-	// Allocate space to store games list
-	numGames = 0;
-	maxNumGames = InitialGameListSize;
 	gameInfo.clear();
 
 	return NoError;
@@ -214,7 +208,7 @@ void GameServer::ProcessJoinRequest(Packet& packet, const sockaddr_in& from)
 	packet.tlMessage.joinHelpRequest.clientAddr.sin_family = 2;		// ** AF_INET
 
 	// Search for a corresponding Session Identifer
-	for (std::size_t gameInfoIndex = 0; gameInfoIndex < numGames; gameInfoIndex++)
+	for (std::size_t gameInfoIndex = 0; gameInfoIndex < gameInfo.size(); gameInfoIndex++)
 	{
 		// Check if the Session Identifier matches
 		if (memcmp(&gameInfo[gameInfoIndex].sessionIdentifier, &packet.tlMessage.joinRequest.sessionIdentifier, sizeof(packet.tlMessage.joinRequest.sessionIdentifier)) == 0)
@@ -244,7 +238,7 @@ void GameServer::ProcessGameSearchQuery(Packet& packet, sockaddr_in& from)
 	packet.header.sizeOfPayload = sizeof(HostedGameSearchReply);
 	packet.tlMessage.tlHeader.commandType = tlcHostedGameSearchReply;
 	// Search games list for suitable games
-	for (std::size_t i = 0; i < numGames; ++i)
+	for (std::size_t i = 0; i < gameInfo.size(); ++i)
 	{
 		// Make sure we have valid game data
 		if ((gameInfo[i].flags & GameInfoReceived) != 0)
@@ -395,7 +389,7 @@ void GameServer::DoTimedUpdates()
 	// Get the current time
 	time_t currentTime = time(0);
 	// Check for timed out game entries
-	for (std::size_t i = numGames; i-- > 0; )
+	for (std::size_t i = gameInfo.size(); i-- > 0; )
 	{
 		// Get the current time difference
 		time_t timeDiff = currentTime - gameInfo[i].time;
@@ -454,7 +448,7 @@ void GameServer::DoTimedUpdates()
 std::size_t GameServer::FindGameInfoClient(const sockaddr_in &from, unsigned int clientRandValue)
 {
 	// Search games list
-	for (std::size_t i = 0; i < numGames; ++i)
+	for (std::size_t i = 0; i < gameInfo.size(); ++i)
 	{
 		// Check if this address matches
 		if ((gameInfo[i].clientRandValue == clientRandValue) && (memcmp(&gameInfo[i].addr, &from, sizeof(sockaddr_in)) == 0))
@@ -472,7 +466,7 @@ std::size_t GameServer::FindGameInfoClient(const sockaddr_in &from, unsigned int
 std::size_t GameServer::FindGameInfoServer(const sockaddr_in &from, unsigned int serverRandValue)
 {
 	// Search games list
-	for (std::size_t i = 0; i < numGames; ++i)
+	for (std::size_t i = 0; i < gameInfo.size(); ++i)
 	{
 		// Check if this address matches
 		if ((gameInfo[i].serverRandValue == serverRandValue) && (memcmp(&gameInfo[i].addr, &from, sizeof(sockaddr_in)) == 0))
@@ -493,22 +487,20 @@ int GameServer::GetNewGameInfo()
 	// Clear the flags of the new entry
 	gameInfo[gameInfo.size() - 1].flags = 0;
 
-	return numGames++;
+	return gameInfo.size();
 }
 
 
 void GameServer::FreeGameInfo(std::size_t index)
 {
 	// Make sure it's a valid index
-	if (index >= numGames)
+	if (index >= gameInfo.size())
 	{
 		LogMessage("Internal Error: Tried to free a non-existent GameInfo record");
 		return;
 	}
 
 	gameInfo.erase(gameInfo.begin() + index);
-
-	numGames--;
 }
 
 
