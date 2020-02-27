@@ -9,11 +9,11 @@
 
 constexpr std::size_t InvalidGameInfoIndex = (std::numeric_limits<std::size_t>::max)();
 
-const unsigned int UpdateTime = 60;			// Number of seconds before requesting update
-const unsigned int RetryTime = 64;			// Number of seconds before requesting update retry
-const unsigned int GiveUpTime = 68;			// Number of seconds before clearing dead entries
-const unsigned int InitialReplyTime = 4;	// Number of seconds allowed for first update
-const GUID gameIdentifier = { 0x5A55CF11, 0xB841, 0x11CE, {0x92, 0x10, 0x00, 0xAA, 0x00, 0x6C, 0x49, 0x72} };
+constexpr unsigned int UpdateTime = 60;			// Number of seconds before requesting update
+constexpr unsigned int RetryTime = 64;			// Number of seconds before requesting update retry
+constexpr unsigned int GiveUpTime = 68;			// Number of seconds before clearing dead entries
+constexpr unsigned int InitialReplyTime = 4;	// Number of seconds allowed for first update
+constexpr GUID gameIdentifier = { 0x5A55CF11, 0xB841, 0x11CE, {0x92, 0x10, 0x00, 0xAA, 0x00, 0x6C, 0x49, 0x72} };
 
 
 
