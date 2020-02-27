@@ -70,7 +70,7 @@ int GameServer::StartServer(unsigned short port)
 		return errorCode;
 	}
 
-	gameInfo.clear();
+	gameInfos.clear();
 
 	return NoError;
 }
@@ -204,13 +204,13 @@ void GameServer::ProcessJoinRequest(Packet& packet, const sockaddr_in& from)
 	packet.tlMessage.joinHelpRequest.clientAddr.sin_family = 2;		// ** AF_INET
 
 	// Search for a corresponding Session Identifer
-	for (std::size_t gameInfoIndex = 0; gameInfoIndex < gameInfo.size(); gameInfoIndex++)
+	for (std::size_t gameInfoIndex = 0; gameInfoIndex < gameInfos.size(); gameInfoIndex++)
 	{
 		// Check if the Session Identifier matches
-		if (memcmp(&gameInfo[gameInfoIndex].sessionIdentifier, &packet.tlMessage.joinRequest.sessionIdentifier, sizeof(packet.tlMessage.joinRequest.sessionIdentifier)) == 0)
+		if (memcmp(&gameInfos[gameInfoIndex].sessionIdentifier, &packet.tlMessage.joinRequest.sessionIdentifier, sizeof(packet.tlMessage.joinRequest.sessionIdentifier)) == 0)
 		{
 			// Send the Join Help Request
-			SendTo(packet, gameInfo[gameInfoIndex].addr);
+			SendTo(packet, gameInfos[gameInfoIndex].addr);
 		}
 	}
 
@@ -234,17 +234,17 @@ void GameServer::ProcessGameSearchQuery(Packet& packet, sockaddr_in& from)
 	packet.header.sizeOfPayload = sizeof(HostedGameSearchReply);
 	packet.tlMessage.tlHeader.commandType = tlcHostedGameSearchReply;
 	// Search games list for suitable games
-	for (std::size_t i = 0; i < gameInfo.size(); ++i)
+	for (std::size_t i = 0; i < gameInfos.size(); ++i)
 	{
 		// Make sure we have valid game data
-		if ((gameInfo[i].flags & GameInfoReceived) != 0)
+		if ((gameInfos[i].flags & GameInfoReceived) != 0)
 		{
-			LogString("  GameCreator: ", gameInfo[i].createGameInfo.gameCreatorName);
+			LogString("  GameCreator: ", gameInfos[i].createGameInfo.gameCreatorName);
 
 			// Consruct a reply packet for this game
-			packet.tlMessage.searchReply.sessionIdentifier = gameInfo[i].sessionIdentifier;
-			packet.tlMessage.searchReply.createGameInfo = gameInfo[i].createGameInfo;
-			packet.tlMessage.searchReply.hostAddress = gameInfo[i].addr;
+			packet.tlMessage.searchReply.sessionIdentifier = gameInfos[i].sessionIdentifier;
+			packet.tlMessage.searchReply.createGameInfo = gameInfos[i].createGameInfo;
+			packet.tlMessage.searchReply.hostAddress = gameInfos[i].addr;
 			packet.tlMessage.searchReply.hostAddress.sin_family = 2;		// ** AF_INET
 			// Send the reply
 			SendTo(packet, from);
@@ -264,7 +264,7 @@ void GameServer::ProcessGameSearchReply(Packet& packet, sockaddr_in& from)
 	if (gameInfoIndex == InvalidGameInfoIndex) {
 		return;		// Discard (not requested or bad time stamp, possible spam or spoofing attack)
 	}
-	GameInfo* currentGameInfo = &gameInfo[gameInfoIndex];
+	GameInfo* currentGameInfo = &gameInfos[gameInfoIndex];
 
 	LogEndpoint("Received Host Info from: ", from.sin_addr.s_addr, from.sin_port);
 
@@ -307,7 +307,7 @@ void GameServer::ProcessPoke(Packet& packet, sockaddr_in& from)
 			counters.numFailedGameInfoAllocs++;
 			return;			// Abort  (failed to allocate new record)
 		}
-		GameInfo* currentGameInfo = &gameInfo[gameInfoIndex];
+		GameInfo* currentGameInfo = &gameInfos[gameInfoIndex];
 
 		LogEndpoint("Game Hosted from: ", from.sin_addr.s_addr, from.sin_port);
 
@@ -385,15 +385,15 @@ void GameServer::DoTimedUpdates()
 	// Get the current time
 	time_t currentTime = time(0);
 	// Check for timed out game entries
-	for (std::size_t i = gameInfo.size(); i-- > 0; )
+	for (std::size_t i = gameInfos.size(); i-- > 0; )
 	{
 		// Get the current time difference
-		time_t timeDiff = currentTime - gameInfo[i].time;
+		time_t timeDiff = currentTime - gameInfos[i].time;
 
 		// Check for no initial update within required time
-		if ((timeDiff >= InitialReplyTime) && ((gameInfo[i].flags & GameInfoReceived) == 0))
+		if ((timeDiff >= InitialReplyTime) && ((gameInfos[i].flags & GameInfoReceived) == 0))
 		{
-			LogEndpoint("Dropping Game: No initial Host Info from: ", gameInfo[i].addr.sin_addr.s_addr, gameInfo[i].addr.sin_port);
+			LogEndpoint("Dropping Game: No initial Host Info from: ", gameInfos[i].addr.sin_addr.s_addr, gameInfos[i].addr.sin_port);
 
 			// Clear bogus entry
 			FreeGameInfo(i);
@@ -401,7 +401,7 @@ void GameServer::DoTimedUpdates()
 			counters.numDroppedHostedPokes++;
 		}
 		// Check if no updates have occured for a while
-		else if ((timeDiff >= UpdateTime) && ((gameInfo[i].flags & GameInfoReceived) != 0))
+		else if ((timeDiff >= UpdateTime) && ((gameInfos[i].flags & GameInfoReceived) != 0))
 		{
 			// Entry is old and requires update
 			// --------------------------------
@@ -409,28 +409,28 @@ void GameServer::DoTimedUpdates()
 			// Check if enough time has elapsed to give up
 			if (timeDiff >= GiveUpTime)
 			{
-				LogEndpoint("Dropping Game: Lost contact with host: ", gameInfo[i].addr.sin_addr.s_addr, gameInfo[i].addr.sin_port);
+				LogEndpoint("Dropping Game: Lost contact with host: ", gameInfos[i].addr.sin_addr.s_addr, gameInfos[i].addr.sin_port);
 
 				// Give up
 				FreeGameInfo(i);
 				counters.numGamesDropped++;
 			}
-			else if ((gameInfo[i].flags & GameInfoExpected) == 0)
+			else if ((gameInfos[i].flags & GameInfoExpected) == 0)
 			{
-				LogEndpoint("Requesting Game info update 1 (periodic): ", gameInfo[i].addr.sin_addr.s_addr, gameInfo[i].addr.sin_port);
+				LogEndpoint("Requesting Game info update 1 (periodic): ", gameInfos[i].addr.sin_addr.s_addr, gameInfos[i].addr.sin_port);
 
 				// Game info is stale, request update
-				SendGameInfoRequest(gameInfo[i].addr, gameInfo[i].serverRandValue);
-				gameInfo[i].flags |= GameInfoExpected;
+				SendGameInfoRequest(gameInfos[i].addr, gameInfos[i].serverRandValue);
+				gameInfos[i].flags |= GameInfoExpected;
 				counters.numUpdateRequestSent++;
 			}
-			else if ((timeDiff >= RetryTime) && ((gameInfo[i].flags & GameInfoUpdateRetrySent) == 0))
+			else if ((timeDiff >= RetryTime) && ((gameInfos[i].flags & GameInfoUpdateRetrySent) == 0))
 			{
-				LogEndpoint("Requesting Game info update 2 (retry): ", gameInfo[i].addr.sin_addr.s_addr, gameInfo[i].addr.sin_port);
+				LogEndpoint("Requesting Game info update 2 (retry): ", gameInfos[i].addr.sin_addr.s_addr, gameInfos[i].addr.sin_port);
 
 				// Assume the packet was dropped. Retry.
-				SendGameInfoRequest(gameInfo[i].addr, gameInfo[i].serverRandValue);
-				gameInfo[i].flags |= GameInfoUpdateRetrySent;
+				SendGameInfoRequest(gameInfos[i].addr, gameInfos[i].serverRandValue);
+				gameInfos[i].flags |= GameInfoUpdateRetrySent;
 				counters.numRetrySent++;
 			}
 		}
@@ -444,10 +444,10 @@ void GameServer::DoTimedUpdates()
 std::size_t GameServer::FindGameInfoClient(const sockaddr_in &from, unsigned int clientRandValue)
 {
 	// Search games list
-	for (std::size_t i = 0; i < gameInfo.size(); ++i)
+	for (std::size_t i = 0; i < gameInfos.size(); ++i)
 	{
 		// Check if this address matches
-		if ((gameInfo[i].clientRandValue == clientRandValue) && (memcmp(&gameInfo[i].addr, &from, sizeof(sockaddr_in)) == 0))
+		if ((gameInfos[i].clientRandValue == clientRandValue) && (memcmp(&gameInfos[i].addr, &from, sizeof(sockaddr_in)) == 0))
 		{
 			// Return the GameInfo
 			return i;
@@ -462,10 +462,10 @@ std::size_t GameServer::FindGameInfoClient(const sockaddr_in &from, unsigned int
 std::size_t GameServer::FindGameInfoServer(const sockaddr_in &from, unsigned int serverRandValue)
 {
 	// Search games list
-	for (std::size_t i = 0; i < gameInfo.size(); ++i)
+	for (std::size_t i = 0; i < gameInfos.size(); ++i)
 	{
 		// Check if this address matches
-		if ((gameInfo[i].serverRandValue == serverRandValue) && (memcmp(&gameInfo[i].addr, &from, sizeof(sockaddr_in)) == 0))
+		if ((gameInfos[i].serverRandValue == serverRandValue) && (memcmp(&gameInfos[i].addr, &from, sizeof(sockaddr_in)) == 0))
 		{
 			// Return the GameInfo
 			return i;
@@ -478,25 +478,25 @@ std::size_t GameServer::FindGameInfoServer(const sockaddr_in &from, unsigned int
 
 int GameServer::GetNewGameInfo()
 {
-	gameInfo.push_back(GameInfo());
+	gameInfos.push_back(GameInfo());
 
 	// Clear the flags of the new entry
-	gameInfo[gameInfo.size() - 1].flags = 0;
+	gameInfos[gameInfos.size() - 1].flags = 0;
 
-	return gameInfo.size();
+	return gameInfos.size();
 }
 
 
 void GameServer::FreeGameInfo(std::size_t index)
 {
 	// Make sure it's a valid index
-	if (index >= gameInfo.size())
+	if (index >= gameInfos.size())
 	{
 		LogMessage("Internal Error: Tried to free a non-existent GameInfo record");
 		return;
 	}
 
-	gameInfo.erase(gameInfo.begin() + index);
+	gameInfos.erase(gameInfos.begin() + index);
 }
 
 

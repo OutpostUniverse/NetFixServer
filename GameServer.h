@@ -122,7 +122,7 @@ private:
 
 	SOCKET hostSocket;
 	SOCKET secondarySocket;
-	std::vector<GameInfo> gameInfo;
+	std::vector<GameInfo> gameInfos;
 	GameServerCounters counters;
 	// Win32 specific data
 	#ifdef WIN32
