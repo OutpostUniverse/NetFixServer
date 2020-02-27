@@ -1,5 +1,5 @@
-#include "ErrorLog.h"
 #include "GameServer.h"
+#include "ErrorLog.h"
 #include <limits>
 
 #ifndef WIN32
