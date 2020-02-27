@@ -204,13 +204,13 @@ void GameServer::ProcessJoinRequest(Packet& packet, const sockaddr_in& from)
 	packet.tlMessage.joinHelpRequest.clientAddr.sin_family = 2;		// ** AF_INET
 
 	// Search for a corresponding Session Identifer
-	for (std::size_t gameInfoIndex = 0; gameInfoIndex < gameInfos.size(); gameInfoIndex++)
+	for (const GameInfo& gameInfo : gameInfos)
 	{
 		// Check if the Session Identifier matches
-		if (memcmp(&gameInfos[gameInfoIndex].sessionIdentifier, &packet.tlMessage.joinRequest.sessionIdentifier, sizeof(packet.tlMessage.joinRequest.sessionIdentifier)) == 0)
+		if (memcmp(&gameInfo.sessionIdentifier, &packet.tlMessage.joinRequest.sessionIdentifier, sizeof(packet.tlMessage.joinRequest.sessionIdentifier)) == 0)
 		{
 			// Send the Join Help Request
-			SendTo(packet, gameInfos[gameInfoIndex].addr);
+			SendTo(packet, gameInfo.addr);
 		}
 	}
 
@@ -234,17 +234,17 @@ void GameServer::ProcessGameSearchQuery(Packet& packet, sockaddr_in& from)
 	packet.header.sizeOfPayload = sizeof(HostedGameSearchReply);
 	packet.tlMessage.tlHeader.commandType = tlcHostedGameSearchReply;
 	// Search games list for suitable games
-	for (std::size_t i = 0; i < gameInfos.size(); ++i)
+	for (const GameInfo& gameInfo : gameInfos)
 	{
 		// Make sure we have valid game data
-		if ((gameInfos[i].flags & GameInfoReceived) != 0)
+		if ((gameInfo.flags & GameInfoReceived) != 0)
 		{
-			LogString("  GameCreator: ", gameInfos[i].createGameInfo.gameCreatorName);
+			LogString("  GameCreator: ", gameInfo.createGameInfo.gameCreatorName);
 
 			// Consruct a reply packet for this game
-			packet.tlMessage.searchReply.sessionIdentifier = gameInfos[i].sessionIdentifier;
-			packet.tlMessage.searchReply.createGameInfo = gameInfos[i].createGameInfo;
-			packet.tlMessage.searchReply.hostAddress = gameInfos[i].addr;
+			packet.tlMessage.searchReply.sessionIdentifier = gameInfo.sessionIdentifier;
+			packet.tlMessage.searchReply.createGameInfo = gameInfo.createGameInfo;
+			packet.tlMessage.searchReply.hostAddress = gameInfo.addr;
 			packet.tlMessage.searchReply.hostAddress.sin_family = 2;		// ** AF_INET
 			// Send the reply
 			SendTo(packet, from);
