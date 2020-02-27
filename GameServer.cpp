@@ -25,7 +25,6 @@ GameServer::GameServer()
 	// Clear counters
 	memset(&counters, 0, sizeof(counters));
 
-	// Perform Win32 specific initialization
 	#ifdef WIN32
 		bWinsockInitialized = false;
 	#endif
@@ -39,10 +38,8 @@ GameServer::~GameServer()
 		closesocket(hostSocket);
 	}
 
-	// Perform Win32 specific cleanup
 	#ifdef WIN32
-		// Check if Winsock is initialized
-		if (bWinsockInitialized != false) {
+		if (bWinsockInitialized) {
 			WSACleanup();
 		}
 	#endif
@@ -56,7 +53,6 @@ int GameServer::StartServer(unsigned short port)
 
 	#ifdef WIN32
 		errorCode = InitWinsock();
-		// Check for errors
 		if (errorCode != 0) {
 			return errorCode;
 		}
