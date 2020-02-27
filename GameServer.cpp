@@ -213,7 +213,6 @@ void GameServer::ProcessJoinRequest(Packet& packet, const sockaddr_in& from)
 			SendTo(packet, gameInfo.addr);
 		}
 	}
-
 }
 
 void GameServer::ProcessGameSearchQuery(Packet& packet, sockaddr_in& from)
