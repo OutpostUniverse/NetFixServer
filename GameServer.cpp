@@ -479,9 +479,6 @@ int GameServer::GetNewGameInfo()
 {
 	gameInfos.push_back(GameInfo());
 
-	// Clear the flags of the new entry
-	gameInfos[gameInfos.size() - 1].flags = 0;
-
 	return gameInfos.size();
 }
 

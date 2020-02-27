@@ -76,7 +76,7 @@ private:
 		time_t time;
 		unsigned int clientRandValue;
 		unsigned int serverRandValue;
-		unsigned int flags;
+		unsigned int flags = 0;
 		CreateGameInfo createGameInfo;
 	};
 
