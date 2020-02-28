@@ -108,7 +108,6 @@ private:
 	void DoTimedUpdates();
 	std::size_t FindGameInfoClient(const sockaddr_in& from, unsigned int clientRandValue);
 	std::size_t FindGameInfoServer(const sockaddr_in& from, unsigned int serverRandValue);
-	int GetNewGameInfo();
 	void FreeGameInfo(std::size_t index);
 	unsigned int GetNewRandValue();
 	int ReceiveFrom(Packet& packet, const sockaddr_in& from);

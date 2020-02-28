@@ -298,7 +298,8 @@ void GameServer::ProcessPoke(Packet& packet, sockaddr_in& from)
 		if (gameInfoIndex == InvalidGameInfoIndex)
 		{
 			counters.numNewHost++;
-			gameInfoIndex = GetNewGameInfo();	// Allocate a new record
+			gameInfos.push_back(GameInfo());
+			gameInfoIndex = gameInfos.size() - 1;
 		}
 		// Make sure we have a record to use
 		if (gameInfoIndex == InvalidGameInfoIndex)
@@ -474,14 +475,6 @@ std::size_t GameServer::FindGameInfoServer(const sockaddr_in &from, unsigned int
 	// GameInfo not found
 	return InvalidGameInfoIndex;
 }
-
-int GameServer::GetNewGameInfo()
-{
-	gameInfos.push_back(GameInfo());
-
-	return gameInfos.size();
-}
-
 
 void GameServer::FreeGameInfo(std::size_t index)
 {
