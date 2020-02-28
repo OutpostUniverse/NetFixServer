@@ -308,19 +308,18 @@ void GameServer::ProcessPoke(Packet& packet, sockaddr_in& from)
 			counters.numFailedGameInfoAllocs++;
 			return;			// Abort  (failed to allocate new record)
 		}
-		GameInfo* currentGameInfo = &gameInfos[gameInfoIndex];
 
 		LogEndpoint("Game Hosted from: ", from.sin_addr.s_addr, from.sin_port);
 
-		// Initialize the new record
-		currentGameInfo->addr = from;
-		currentGameInfo->clientRandValue = packet.tlMessage.gameServerPoke.randValue;
-		currentGameInfo->serverRandValue = GetNewRandValue();
-		currentGameInfo->flags |= GameInfoExpected;
-		currentGameInfo->time = time(0);
+		GameInfo& newGameInfo = gameInfos[gameInfoIndex];
+		newGameInfo.addr = from;
+		newGameInfo.clientRandValue = packet.tlMessage.gameServerPoke.randValue;
+		newGameInfo.serverRandValue = GetNewRandValue();
+		newGameInfo.flags |= GameInfoExpected;
+		newGameInfo.time = time(0);
 
 		// Send a request for games
-		SendGameInfoRequest(from, currentGameInfo->serverRandValue);
+		SendGameInfoRequest(from, newGameInfo.serverRandValue);
 
 		// Update counters
 		counters.numGamesHosted++;
@@ -625,11 +624,10 @@ void GameServer::SendGameInfoRequest(sockaddr_in &to, unsigned int serverRandVal
 
 		// Initialize Winsock
 		WSADATA wsaData;
-		int errorCode;
 		WORD version = MAKEWORD(2, 2);
 
 		// Initialize Winsock
-		errorCode = WSAStartup(version, &wsaData);
+		int errorCode = WSAStartup(version, &wsaData);
 
 		if (errorCode == 0)
 		{
