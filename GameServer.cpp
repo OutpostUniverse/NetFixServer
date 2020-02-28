@@ -302,12 +302,6 @@ void GameServer::ProcessPoke(Packet& packet, sockaddr_in& from)
 			gameInfos.push_back(GameInfo());
 			gameInfoIndex = gameInfos.size() - 1;
 		}
-		// Make sure we have a record to use
-		if (gameInfoIndex == InvalidGameInfoIndex)
-		{
-			counters.numFailedGameInfoAllocs++;
-			return;			// Abort  (failed to allocate new record)
-		}
 
 		LogEndpoint("Game Hosted from: ", from.sin_addr.s_addr, from.sin_port);
 
