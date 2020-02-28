@@ -263,17 +263,18 @@ void GameServer::ProcessGameSearchReply(Packet& packet, sockaddr_in& from)
 	if (gameInfoIndex == InvalidGameInfoIndex) {
 		return;		// Discard (not requested or bad time stamp, possible spam or spoofing attack)
 	}
-	GameInfo* currentGameInfo = &gameInfos[gameInfoIndex];
+
+	GameInfo& gameInfo = gameInfos[gameInfoIndex];
 
 	LogEndpoint("Received Host Info from: ", from.sin_addr.s_addr, from.sin_port);
 
 	// Add the game to the list
-	currentGameInfo->sessionIdentifier = packet.tlMessage.searchReply.sessionIdentifier;
-	currentGameInfo->addr = from;
-	currentGameInfo->flags |= GameInfoReceived;
-	currentGameInfo->flags &= ~GameInfoExpected & ~GameInfoUpdateRetrySent;
-	currentGameInfo->createGameInfo = packet.tlMessage.searchReply.createGameInfo;
-	currentGameInfo->time = time(0);
+	gameInfo.sessionIdentifier = packet.tlMessage.searchReply.sessionIdentifier;
+	gameInfo.addr = from;
+	gameInfo.flags |= GameInfoReceived;
+	gameInfo.flags &= ~GameInfoExpected & ~GameInfoUpdateRetrySent;
+	gameInfo.createGameInfo = packet.tlMessage.searchReply.createGameInfo;
+	gameInfo.time = time(0);
 }
 
 void GameServer::ProcessPoke(Packet& packet, sockaddr_in& from)
