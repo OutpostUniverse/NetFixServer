@@ -264,11 +264,10 @@ void GameServer::ProcessGameSearchReply(Packet& packet, sockaddr_in& from)
 		return;		// Discard (not requested or bad time stamp, possible spam or spoofing attack)
 	}
 
-	GameInfo& gameInfo = gameInfos[gameInfoIndex];
-
 	LogEndpoint("Received Host Info from: ", from.sin_addr.s_addr, from.sin_port);
 
 	// Add the game to the list
+	GameInfo& gameInfo = gameInfos[gameInfoIndex];
 	gameInfo.sessionIdentifier = packet.tlMessage.searchReply.sessionIdentifier;
 	gameInfo.addr = from;
 	gameInfo.flags |= GameInfoReceived;
