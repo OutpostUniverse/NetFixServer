@@ -19,17 +19,32 @@ constexpr GUID gameIdentifier = { 0x5A55CF11, 0xB841, 0x11CE, {0x92, 0x10, 0x00,
 
 
 
-GameServer::GameServer() : 
+GameServer::GameServer(unsigned short port) :
 	hostSocket(INVALID_SOCKET)
 {
 	// Clear counters
 	memset(&counters, 0, sizeof(counters));
 
-	#ifdef WIN32
-		InitializeWinsock();
-	#endif
-}
+#ifdef WIN32
+	InitializeWinsock();
+#endif
 
+	// Create the host socket
+	try {
+		AllocSocket(hostSocket, port);
+	}
+	catch (const std::exception& e) {
+		throw std::runtime_error("Error allocating GameServer's host socket: " + std::string(e.what()));
+	}
+
+	// Create the secondary socket
+	try {
+		AllocSocket(secondarySocket, port + 1);
+	}
+	catch (const std::exception& e) {
+		throw std::runtime_error("Error allocating GameServer's secondary socket: " + std::string(e.what()));
+	}
+}
 
 GameServer::~GameServer()
 {
@@ -41,29 +56,6 @@ GameServer::~GameServer()
 #ifdef WIN32
 	WSACleanup();
 #endif
-}
-
-
-
-void GameServer::StartServer(unsigned short port)
-{
-	// Create the host socket
-	try {
-		AllocSocket(hostSocket, port);
-	}
-	catch (const std::exception & e) {
-		throw std::runtime_error("Error allocating GameServer's host socket: " + std::string(e.what()));
-	}
-
-	// Create the secondary socket
-	try {
-		AllocSocket(secondarySocket, port + 1);
-	}
-	catch (const std::exception& e) {
-		throw std::runtime_error("Error allocating GameServer's secondary socket: " + std::string(e.what()));
-	}
-
-	gameSessions.clear();
 }
 
 void GameServer::Pump()

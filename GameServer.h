@@ -51,10 +51,9 @@ struct GameServerCounters
 class GameServer
 {
 public:
-	GameServer();
+	GameServer(unsigned short port);
 	~GameServer();
 
-	void StartServer(unsigned short port);
 	void Pump();
 	void WaitForEvent();
 
