@@ -118,8 +118,4 @@ private:
 	SOCKET secondarySocket;
 	std::vector<GameSession> gameSessions;
 	GameServerCounters counters;
-	// Win32 specific data
-	#ifdef WIN32
-		int bWinsockInitialized;
-	#endif
 };

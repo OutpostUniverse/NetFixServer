@@ -28,7 +28,7 @@ GameServer::GameServer()
 	memset(&counters, 0, sizeof(counters));
 
 	#ifdef WIN32
-		bWinsockInitialized = false;
+		InitializeWinsock();
 	#endif
 }
 
@@ -40,21 +40,15 @@ GameServer::~GameServer()
 		closesocket(hostSocket);
 	}
 
-	#ifdef WIN32
-		if (bWinsockInitialized) {
-			WSACleanup();
-		}
-	#endif
+#ifdef WIN32
+	WSACleanup();
+#endif
 }
 
 
 
 void GameServer::StartServer(unsigned short port)
 {
-	#ifdef WIN32
-		InitializeWinsock();
-	#endif
-
 	// Create the host socket
 	try {
 		AllocSocket(hostSocket, port);
@@ -606,11 +600,6 @@ void GameServer::SendGameSessionRequest(sockaddr_in &to, unsigned int serverRand
 #ifdef WIN32
 	void GameServer::InitializeWinsock()
 	{
-		// Make sure Winsock was not already initialized
-		if (bWinsockInitialized != false) {
-			throw std::runtime_error("Winsock already enabled in GameServer");
-		}
-
 		// Initialize Winsock
 		WSADATA wsaData;
 		WORD version = MAKEWORD(2, 2);
@@ -627,8 +616,5 @@ void GameServer::SendGameSessionRequest(sockaddr_in &to, unsigned int serverRand
 				throw std::runtime_error("Incorrect version of Winsock initialized in GameServer");
 			}
 		}
-
-		// Winsock Initialized successfully
-		bWinsockInitialized = true;
 	}
 #endif
