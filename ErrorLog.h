@@ -2,12 +2,13 @@
 
 #include "GameServer.h"
 #include <iostream>
+#include <string_view>
 
 
-void LogMessage(const char* message);
-void LogString(const char* message, const char* string);
-void LogValue(const char* message, int value);
-void LogValueHex(const char* message, int value);
-void LogEndpoint(const char* message, unsigned long ipAddr, unsigned short port);
+void LogMessage(std::string_view message);
+void LogString(std::string_view message, std::string_view string);
+void LogValue(std::string_view message, int value);
+void LogValueHex(std::string_view message, int value);
+void LogEndpoint(std::string_view message, unsigned long ipAddr, unsigned short port);
 
 void LogCounters(GameServerCounters& counters);
