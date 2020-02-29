@@ -440,7 +440,7 @@ std::size_t GameServer::FindGameInfoClient(const sockaddr_in &from, unsigned int
 	for (std::size_t i = 0; i < gameInfos.size(); ++i)
 	{
 		// Check if this address matches
-		if ((gameInfos[i].clientRandValue == clientRandValue) && (memcmp(&gameInfos[i].addr, &from, sizeof(sockaddr_in)) == 0))
+		if ((gameInfos[i].clientRandValue == clientRandValue) && gameInfos[i].SocketAddressMatches(from))
 		{
 			// Return the GameInfo
 			return i;
@@ -458,7 +458,7 @@ std::size_t GameServer::FindGameInfoServer(const sockaddr_in &from, unsigned int
 	for (std::size_t i = 0; i < gameInfos.size(); ++i)
 	{
 		// Check if this address matches
-		if ((gameInfos[i].serverRandValue == serverRandValue) && (memcmp(&gameInfos[i].addr, &from, sizeof(sockaddr_in)) == 0))
+		if ((gameInfos[i].serverRandValue == serverRandValue) && gameInfos[i].SocketAddressMatches(from))
 		{
 			// Return the GameInfo
 			return i;

@@ -2,6 +2,7 @@
 
 #include "Packet.h"
 #include <time.h>
+#include <cstring>
 #include <cstddef>
 #include <vector>
 
@@ -78,6 +79,11 @@ private:
 		unsigned int serverRandValue;
 		unsigned int flags = 0;
 		CreateGameInfo createGameInfo;
+
+		inline bool SocketAddressMatches(const sockaddr_in& socketAddress) const
+		{
+			return memcmp(&addr, &socketAddress, sizeof(socketAddress)) == 0;
+		}
 	};
 
 	enum GameServerGameFlags
