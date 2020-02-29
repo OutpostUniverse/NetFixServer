@@ -1,9 +1,21 @@
 version: 2.1
 
 jobs:
-  build:
+  build-linux:
     docker:
       - image: outpostuniverse/netfix:1.0
     steps:
       - checkout
       - run: make --keep-going
+  build-linux-clang:
+    docker:
+      - image: outpostuniverse/netfix:1.0
+    steps:
+      - checkout
+      - run: make --keep-going CXX=clang++
+
+workflows:
+  build:
+    jobs:
+      - build-linux
+      - build-linux-clang
