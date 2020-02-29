@@ -113,7 +113,7 @@ void GameServer::AllocSocket(SOCKET& hostSocket, unsigned short port)
 	hostSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
 	if (hostSocket == INVALID_SOCKET) {
-		throw std::runtime_error("Unable to allocate socket");
+		throw std::runtime_error("Unable to allocate socket at port " + std::to_string(port));
 	}
 
 	// Bind the socket to the host port
@@ -127,7 +127,9 @@ void GameServer::AllocSocket(SOCKET& hostSocket, unsigned short port)
 	int errorCode = bind(hostSocket, (sockaddr*)&hostAddress, sizeof(hostAddress));
 
 	if (errorCode == SOCKET_ERROR) {
-		throw std::runtime_error("Unable to bind socket");
+		throw std::runtime_error("Unable to bind socket at host address of " + 
+			FormatIPAddressWithPort(hostAddress.sin_addr.s_addr, port) +
+			". Windows Sockets Error Code: " + std::to_string(WSAGetLastError()));
 	}
 
 	// Set non-blocking mode
@@ -135,7 +137,9 @@ void GameServer::AllocSocket(SOCKET& hostSocket, unsigned short port)
 	errorCode = ioctlsocket(hostSocket, FIONBIO, &argp);
 
 	if (errorCode != 0) {
-		throw std::runtime_error("Unable to set non-blocking mode on socket");
+		throw std::runtime_error("Unable to set non-blocking mode on socket at host address of  " + 
+			FormatIPAddressWithPort(hostAddress.sin_addr.s_addr, port) + 
+			". Windows Sockets Error Code: " + std::to_string(WSAGetLastError()));
 	}
 }
 
@@ -603,7 +607,8 @@ void GameServer::SendGameSessionRequest(sockaddr_in &to, unsigned int serverRand
 			if (wsaData.wVersion != version)
 			{
 				WSACleanup();
-				throw std::runtime_error("Incorrect version of Winsock initialized in GameServer");
+				throw std::runtime_error("Incorrect version of Winsock initialized in GameServer. Requested Version: " + 
+					std::to_string(version) + ". Initialized Version: " + std::to_string(wsaData.wVersion));
 			}
 		}
 	}
