@@ -14,9 +14,7 @@
 #include "ErrorLog.h"
 #include "GameServer.h"
 #include <cstdlib>
-#include <string>
 #include <exception>
-#include <memory>
 
 
 const char PortNumParam[] = "PortNum=";
@@ -36,26 +34,27 @@ int main(int argc, char **argv)
 		}
 	}
 
-	std::unique_ptr<GameServer> gameServer;
-	try {
-		gameServer = std::make_unique<GameServer>(portNum);
-	}
-	catch (const std::exception& e) {
-		LogMessage("Game Server failed to start: " + std::string(e.what()));
-		return 1;
-	}
-
-	// Show what port the server is bound to
-	LogValue("Game Server started on port: ", portNum);
-
-	// Enter server loop
-	for (;;)
+	try 
 	{
-		// Process network messages
-		gameServer->Pump();
+		GameServer gameServer(portNum);
 
-		// Yield to other processes
-		gameServer->WaitForEvent();
+		// Show what port the server is bound to
+		LogValue("Game Server started on port: ", portNum);
+
+		// Enter server loop
+		for (;;)
+		{
+			// Process network messages
+			gameServer.Pump();
+
+			// Yield to other processes
+			gameServer.WaitForEvent();
+		}
+	}
+	catch (const std::exception& e)
+	{
+		LogMessage(e.what());
+		return 1;
 	}
 
 	return 0;
