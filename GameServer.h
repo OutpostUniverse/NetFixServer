@@ -3,6 +3,7 @@
 #include "Packet.h"
 #include <time.h>
 #include <cstddef>
+#include <vector>
 
 #ifdef WIN32
 	#include <winsock2.h>
@@ -54,7 +55,6 @@ enum GameServerErrorCode
 	SocketCreateFailed,
 	SocketBindFailed,
 	SocketNonBlockingModeFailed,
-	AllocGameListFailed,
 };
 
 
@@ -76,7 +76,7 @@ private:
 		time_t time;
 		unsigned int clientRandValue;
 		unsigned int serverRandValue;
-		unsigned int flags;
+		unsigned int flags = 0;
 		CreateGameInfo createGameInfo;
 	};
 
@@ -108,12 +108,11 @@ private:
 	void DoTimedUpdates();
 	std::size_t FindGameInfoClient(const sockaddr_in& from, unsigned int clientRandValue);
 	std::size_t FindGameInfoServer(const sockaddr_in& from, unsigned int serverRandValue);
-	int GetNewGameInfo();
 	void FreeGameInfo(std::size_t index);
 	unsigned int GetNewRandValue();
 	int ReceiveFrom(Packet& packet, const sockaddr_in& from);
 	bool ReadSocketData(std::size_t& byteCountOut, SOCKET& socket, Packet& packetBuffer, const sockaddr_in& from);
-	void SendTo(Packet& packet, sockaddr_in& to);
+	void SendTo(Packet& packet, const sockaddr_in& to);
 	void SendGameInfoRequest(sockaddr_in& to, unsigned int serverRandValue);
 	// Win32 specific functions
 #ifdef WIN32
@@ -122,9 +121,7 @@ private:
 
 	SOCKET hostSocket;
 	SOCKET secondarySocket;
-	GameInfo* gameInfo;
-	unsigned int numGames;
-	unsigned int maxNumGames;
+	std::vector<GameInfo> gameInfos;
 	GameServerCounters counters;
 	// Win32 specific data
 	#ifdef WIN32
