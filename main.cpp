@@ -28,7 +28,7 @@ int main(int argc, char **argv)
 
 	int stringLen = strlen(PortNumParam);
 	// Check for command line parameters
-	for (int i = 0; i < argc; i++)
+	for (int i = 0; i < argc; ++i)
 	{
 		if (strncmp(argv[i], PortNumParam, stringLen) == 0)
 		{
