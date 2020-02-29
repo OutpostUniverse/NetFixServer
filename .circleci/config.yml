@@ -1,9 +1,9 @@
-version: 2
+version: 2.1
+
 jobs:
   build:
     docker:
-      - image: gcc:8
+      - image: outpostuniverse/netfix:1.0
     steps:
       - checkout
-      - run: make
-
+      - run: make --keep-going
