@@ -5,6 +5,7 @@
 #include <cstring>
 #include <cstddef>
 #include <vector>
+#include <string>
 
 #ifdef WIN32
 	#include <winsock2.h>
@@ -93,6 +94,7 @@ private:
 	};
 
 	void AllocSocket(SOCKET& socket, unsigned short port);
+	std::string FormatSocketError(const std::string& message, const sockaddr_in& address);
 	void ProcessPacket(Packet& packet, sockaddr_in& from);
 	void ProcessJoinRequest(Packet& packet, const sockaddr_in& from);
 	void ProcessGameSearchQuery(Packet& packet, sockaddr_in& from);

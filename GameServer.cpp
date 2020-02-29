@@ -1,7 +1,6 @@
 #include "GameServer.h"
 #include "ErrorLog.h"
 #include <limits>
-#include <string>
 #include <stdexcept>
 
 #ifndef WIN32
@@ -127,9 +126,7 @@ void GameServer::AllocSocket(SOCKET& hostSocket, unsigned short port)
 	int errorCode = bind(hostSocket, (sockaddr*)&hostAddress, sizeof(hostAddress));
 
 	if (errorCode == SOCKET_ERROR) {
-		throw std::runtime_error("Unable to bind socket at host address of " + 
-			FormatIPAddressWithPort(hostAddress.sin_addr.s_addr, port) +
-			". Windows Sockets Error Code: " + std::to_string(WSAGetLastError()));
+		throw std::runtime_error(FormatSocketError("Unable to bind socket at host address of ", hostAddress));
 	}
 
 	// Set non-blocking mode
@@ -137,10 +134,19 @@ void GameServer::AllocSocket(SOCKET& hostSocket, unsigned short port)
 	errorCode = ioctlsocket(hostSocket, FIONBIO, &argp);
 
 	if (errorCode != 0) {
-		throw std::runtime_error("Unable to set non-blocking mode on socket at host address of  " + 
-			FormatIPAddressWithPort(hostAddress.sin_addr.s_addr, port) + 
-			". Windows Sockets Error Code: " + std::to_string(WSAGetLastError()));
+		throw std::runtime_error(FormatSocketError("Unable to set non-blocking mode on socket at host address of  ", hostAddress));
 	}
+}
+
+std::string GameServer::FormatSocketError(const std::string& message, const sockaddr_in& address)
+{
+	std::string formattedMessage = message + FormatIPAddressWithPort(address.sin_addr.s_addr, address.sin_port) + ". ";
+
+#ifdef WIN32
+	formattedMessage += std::string(". Windows Sockets Error Code: " + std::to_string(WSAGetLastError()));
+#endif
+
+	return formattedMessage;
 }
 
 void GameServer::ProcessPacket(Packet &packet, sockaddr_in &from)
