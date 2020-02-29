@@ -2,8 +2,11 @@
 
 #include "GameServer.h"
 #include <iostream>
+#include <string>
 #include <string_view>
 
+
+std::string FormatIPAddressWithPort(unsigned long ipAddr, unsigned short port);
 
 void LogMessage(std::string_view message);
 void LogString(std::string_view message, std::string_view string);
