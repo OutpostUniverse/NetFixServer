@@ -2,6 +2,7 @@
 
 #include "Packet.h"
 #include <time.h>
+#include <cstring>
 #include <cstddef>
 #include <vector>
 
@@ -43,7 +44,7 @@ struct GameServerCounters
 	unsigned int numTypeFieldErrors;
 	unsigned int numChecksumFieldErrors;
 	// Error counts
-	unsigned int numFailedGameInfoAllocs;
+	unsigned int numFailedGameSessionAllocations;
 };
 
 enum GameServerErrorCode
@@ -69,7 +70,7 @@ public:
 	void WaitForEvent();
 
 private:
-	struct GameInfo
+	struct GameSession
 	{
 		GUID sessionIdentifier;
 		sockaddr_in addr;
@@ -78,13 +79,18 @@ private:
 		unsigned int serverRandValue;
 		unsigned int flags = 0;
 		CreateGameInfo createGameInfo;
+
+		inline bool SocketAddressMatches(const sockaddr_in& socketAddress) const
+		{
+			return memcmp(&addr, &socketAddress, sizeof(socketAddress)) == 0;
+		}
 	};
 
 	enum GameServerGameFlags
 	{
-		GameInfoExpected = 1,
-		GameInfoReceived = 2,
-		GameInfoUpdateRetrySent = 4,
+		GameSessionExpected = 1,
+		GameSessionReceived = 2,
+		GameSessionUpdateRetrySent = 4,
 	};
 
 	enum GameServerPacketErrorCode
@@ -106,14 +112,14 @@ private:
 	void ProcessPoke(Packet& packet, sockaddr_in& from);
 	void ProcessRequestExternalAddress(Packet& packet, sockaddr_in& from);
 	void DoTimedUpdates();
-	std::size_t FindGameInfoClient(const sockaddr_in& from, unsigned int clientRandValue);
-	std::size_t FindGameInfoServer(const sockaddr_in& from, unsigned int serverRandValue);
-	void FreeGameInfo(std::size_t index);
+	std::size_t FindGameSessionClient(const sockaddr_in& from, unsigned int clientRandValue);
+	std::size_t FindGameSessionServer(const sockaddr_in& from, unsigned int serverRandValue);
+	void FreeGameSession(std::size_t index);
 	unsigned int GetNewRandValue();
 	int ReceiveFrom(Packet& packet, const sockaddr_in& from);
 	bool ReadSocketData(std::size_t& byteCountOut, SOCKET& socket, Packet& packetBuffer, const sockaddr_in& from);
 	void SendTo(Packet& packet, const sockaddr_in& to);
-	void SendGameInfoRequest(sockaddr_in& to, unsigned int serverRandValue);
+	void SendGameSessionRequest(sockaddr_in& to, unsigned int serverRandValue);
 	// Win32 specific functions
 #ifdef WIN32
 	int InitWinsock();
@@ -121,7 +127,7 @@ private:
 
 	SOCKET hostSocket;
 	SOCKET secondarySocket;
-	std::vector<GameInfo> gameInfos;
+	std::vector<GameSession> gameSessions;
 	GameServerCounters counters;
 	// Win32 specific data
 	#ifdef WIN32

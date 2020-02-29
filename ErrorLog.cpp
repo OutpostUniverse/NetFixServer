@@ -110,7 +110,7 @@ void LogCounters(GameServerCounters& counters)
 	logFile << "counters.numTypeFieldErrors    :" << counters.numTypeFieldErrors << std::endl;
 	logFile << "counters.numChecksumFieldErrors:" << counters.numChecksumFieldErrors << std::endl;
 	// Error counts
-	logFile << "counters.numFailedGameInfoAllocs:" << counters.numFailedGameInfoAllocs << std::endl;
+	logFile << "counters.numFailedGameSessionAllocations:" << counters.numFailedGameSessionAllocations << std::endl;
 	logFile << std::endl;
 }
 */
