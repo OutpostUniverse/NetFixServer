@@ -14,6 +14,8 @@
 #include "ErrorLog.h"
 #include "GameServer.h"
 #include <cstdlib>
+#include <string>
+#include <exception>
 
 
 const char PortNumParam[] = "PortNum=";
@@ -34,13 +36,14 @@ int main(int argc, char **argv)
 	}
 
 	GameServer gameServer;
-	int errorCode = gameServer.StartServer(portNum);
-
-	if (errorCode != 0)
-	{
-		LogMessage("Game Server failed to start");
-		return errorCode;
+	try {
+		gameServer.StartServer(portNum);
 	}
+	catch (const std::exception& e) {
+		LogMessage("Game Server failed to start: " + std::string(e.what()));
+		return 1;
+	}
+
 	// Show what port the server is bound to
 	LogValue("Game Server started on port: ", portNum);
 

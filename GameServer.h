@@ -47,17 +47,6 @@ struct GameServerCounters
 	unsigned int numFailedGameSessionAllocations;
 };
 
-enum GameServerErrorCode
-{
-	NoError = 0,
-	// Init Errors
-	WinsockInitFailed,
-	WinsockVersionFailed,
-	SocketCreateFailed,
-	SocketBindFailed,
-	SocketNonBlockingModeFailed,
-};
-
 
 class GameServer
 {
@@ -65,7 +54,7 @@ public:
 	GameServer();
 	~GameServer();
 
-	int StartServer(unsigned short port);
+	void StartServer(unsigned short port);
 	void Pump();
 	void WaitForEvent();
 
@@ -104,7 +93,7 @@ private:
 		PacketChecksumBad = -5,
 	};
 
-	int AllocSocket(SOCKET& socket, unsigned short port);
+	void AllocSocket(SOCKET& socket, unsigned short port);
 	void ProcessPacket(Packet& packet, sockaddr_in& from);
 	void ProcessJoinRequest(Packet& packet, const sockaddr_in& from);
 	void ProcessGameSearchQuery(Packet& packet, sockaddr_in& from);
@@ -122,7 +111,7 @@ private:
 	void SendGameSessionRequest(sockaddr_in& to, unsigned int serverRandValue);
 	// Win32 specific functions
 #ifdef WIN32
-	int InitWinsock();
+	void InitializeWinsock();
 #endif
 
 	SOCKET hostSocket;

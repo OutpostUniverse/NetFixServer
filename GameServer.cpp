@@ -1,6 +1,8 @@
 #include "GameServer.h"
 #include "ErrorLog.h"
 #include <limits>
+#include <string>
+#include <stdexcept>
 
 #ifndef WIN32
 	#define closesocket close
@@ -47,32 +49,29 @@ GameServer::~GameServer()
 
 
 
-int GameServer::StartServer(unsigned short port)
+void GameServer::StartServer(unsigned short port)
 {
-	int errorCode;
-
 	#ifdef WIN32
-		errorCode = InitWinsock();
-		if (errorCode != 0) {
-			return errorCode;
-		}
+		InitializeWinsock();
 	#endif
 
 	// Create the host socket
-	errorCode = AllocSocket(hostSocket, port);
-	if (errorCode != NoError) {
-		return errorCode;
+	try {
+		AllocSocket(hostSocket, port);
+	}
+	catch (const std::exception & e) {
+		throw std::runtime_error("Error allocating GameServer's host socket: " + std::string(e.what()));
 	}
 
 	// Create the secondary socket
-	errorCode = AllocSocket(secondarySocket, port + 1);
-	if (errorCode != NoError) {
-		return errorCode;
+	try {
+		AllocSocket(secondarySocket, port + 1);
+	}
+	catch (const std::exception& e) {
+		throw std::runtime_error("Error allocating GameServer's secondary socket: " + std::string(e.what()));
 	}
 
 	gameSessions.clear();
-
-	return NoError;
 }
 
 void GameServer::Pump()
@@ -124,13 +123,13 @@ void GameServer::WaitForEvent()
 }
 
 
-int GameServer::AllocSocket(SOCKET& hostSocket, unsigned short port)
+void GameServer::AllocSocket(SOCKET& hostSocket, unsigned short port)
 {
 	// Create the host socket
 	hostSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
 	if (hostSocket == INVALID_SOCKET) {
-		return SocketCreateFailed;
+		throw std::runtime_error("Unable to allocate socket");
 	}
 
 	// Bind the socket to the host port
@@ -144,7 +143,7 @@ int GameServer::AllocSocket(SOCKET& hostSocket, unsigned short port)
 	int errorCode = bind(hostSocket, (sockaddr*)&hostAddress, sizeof(hostAddress));
 
 	if (errorCode == SOCKET_ERROR) {
-		return SocketBindFailed;
+		throw std::runtime_error("Unable to bind socket");
 	}
 
 	// Set non-blocking mode
@@ -152,10 +151,8 @@ int GameServer::AllocSocket(SOCKET& hostSocket, unsigned short port)
 	errorCode = ioctlsocket(hostSocket, FIONBIO, &argp);
 
 	if (errorCode != 0) {
-		return SocketNonBlockingModeFailed;
+		throw std::runtime_error("Unable to set non-blocking mode on socket");
 	}
-
-	return NoError;
 }
 
 void GameServer::ProcessPacket(Packet &packet, sockaddr_in &from)
@@ -607,12 +604,11 @@ void GameServer::SendGameSessionRequest(sockaddr_in &to, unsigned int serverRand
 
 
 #ifdef WIN32
-	int GameServer::InitWinsock()
+	void GameServer::InitializeWinsock()
 	{
 		// Make sure Winsock was not already initialized
-		if (bWinsockInitialized != false)
-		{
-			return WinsockInitFailed;			// Error: Already initialized
+		if (bWinsockInitialized != false) {
+			throw std::runtime_error("Winsock already enabled in GameServer");
 		}
 
 		// Initialize Winsock
@@ -627,14 +623,12 @@ void GameServer::SendGameSessionRequest(sockaddr_in &to, unsigned int serverRand
 			// Check if we got the right version
 			if (wsaData.wVersion != version)
 			{
-				// Wrong version
 				WSACleanup();
-				return WinsockVersionFailed;	// Error: Wrong Winsock version
+				throw std::runtime_error("Incorrect version of Winsock initialized in GameServer");
 			}
 		}
 
 		// Winsock Initialized successfully
 		bWinsockInitialized = true;
-		return NoError;
 	}
 #endif
