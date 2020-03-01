@@ -4,6 +4,26 @@
 std::ostream& logFile = std::cerr;
 
 
+std::string FormatIPAddressWithPort(unsigned long ipAddress, unsigned short port)
+{
+	union
+	{
+		unsigned long ipAddress;
+		struct
+		{
+			unsigned char b1;
+			unsigned char b2;
+			unsigned char b3;
+			unsigned char b4;
+		};
+	} ip;
+
+	ip.ipAddress = ipAddress;
+
+	return std::to_string(ip.b1) + "." + std::to_string(ip.b2) + "." +
+		std::to_string(ip.b3) + "." + std::to_string(ip.b4) + ":" + std::to_string(port);
+}
+
 void LogMessage(std::string_view message)
 {
 	logFile << message << std::endl;
@@ -24,24 +44,9 @@ void LogValueHex(std::string_view message, int value)
 	logFile << message << std::hex << value << std::endl;
 }
 
-void LogEndpoint(std::string_view message, unsigned long ipAddr, unsigned short port)
+void LogEndpoint(std::string_view message, unsigned long ipAddress, unsigned short port)
 {
-	union
-	{
-		unsigned long ipAddr;
-		struct
-		{
-			unsigned char b1;
-			unsigned char b2;
-			unsigned char b3;
-			unsigned char b4;
-		};
-	} ip;
-
-	ip.ipAddr = ipAddr;
-
-	logFile << message << (unsigned int)ip.b1 << "." << (unsigned int)ip.b2 << "." << (unsigned int)ip.b3 << "." << (unsigned int)ip.b4 
-			<< ":" << port << std::endl;
+	logFile << message << FormatIPAddressWithPort(ipAddress, port) << std::endl;
 }
 
 void LogCounters(GameServerCounters& counters)

@@ -5,6 +5,7 @@
 #include <cstring>
 #include <cstddef>
 #include <vector>
+#include <string>
 
 #ifdef WIN32
 	#include <winsock2.h>
@@ -47,25 +48,13 @@ struct GameServerCounters
 	unsigned int numFailedGameSessionAllocations;
 };
 
-enum GameServerErrorCode
-{
-	NoError = 0,
-	// Init Errors
-	WinsockInitFailed,
-	WinsockVersionFailed,
-	SocketCreateFailed,
-	SocketBindFailed,
-	SocketNonBlockingModeFailed,
-};
-
 
 class GameServer
 {
 public:
-	GameServer();
+	GameServer(unsigned short port);
 	~GameServer();
 
-	int StartServer(unsigned short port);
 	void Pump();
 	void WaitForEvent();
 
@@ -104,7 +93,8 @@ private:
 		PacketChecksumBad = -5,
 	};
 
-	int AllocSocket(SOCKET& socket, unsigned short port);
+	void AllocSocket(SOCKET& socket, unsigned short port);
+	std::string FormatSocketError(const std::string& message, const sockaddr_in& address);
 	void ProcessPacket(Packet& packet, sockaddr_in& from);
 	void ProcessJoinRequest(Packet& packet, const sockaddr_in& from);
 	void ProcessGameSearchQuery(Packet& packet, sockaddr_in& from);
@@ -122,15 +112,11 @@ private:
 	void SendGameSessionRequest(sockaddr_in& to, unsigned int serverRandValue);
 	// Win32 specific functions
 #ifdef WIN32
-	int InitWinsock();
+	void InitializeWinsock();
 #endif
 
 	SOCKET hostSocket;
 	SOCKET secondarySocket;
 	std::vector<GameSession> gameSessions;
 	GameServerCounters counters;
-	// Win32 specific data
-	#ifdef WIN32
-		int bWinsockInitialized;
-	#endif
 };

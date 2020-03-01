@@ -14,6 +14,7 @@
 #include "ErrorLog.h"
 #include "GameServer.h"
 #include <cstdlib>
+#include <exception>
 
 
 const char PortNumParam[] = "PortNum=";
@@ -25,7 +26,7 @@ int main(int argc, char **argv)
 
 	int stringLen = strlen(PortNumParam);
 	// Check for command line parameters
-	for (int i = 0; i < argc; i++)
+	for (int i = 0; i < argc; ++i)
 	{
 		if (strncmp(argv[i], PortNumParam, stringLen) == 0)
 		{
@@ -33,25 +34,27 @@ int main(int argc, char **argv)
 		}
 	}
 
-	GameServer gameServer;
-	int errorCode = gameServer.StartServer(portNum);
-
-	if (errorCode != 0)
+	try 
 	{
-		LogMessage("Game Server failed to start");
-		return errorCode;
+		GameServer gameServer(portNum);
+
+		// Show what port the server is bound to
+		LogValue("Game Server started on port: ", portNum);
+
+		// Enter server loop
+		for (;;)
+		{
+			// Process network messages
+			gameServer.Pump();
+
+			// Yield to other processes
+			gameServer.WaitForEvent();
+		}
 	}
-	// Show what port the server is bound to
-	LogValue("Game Server started on port: ", portNum);
-
-	// Enter server loop
-	for (;;)
+	catch (const std::exception& e)
 	{
-		// Process network messages
-		gameServer.Pump();
-
-		// Yield to other processes
-		gameServer.WaitForEvent();
+		LogMessage(e.what());
+		return 1;
 	}
 
 	return 0;
