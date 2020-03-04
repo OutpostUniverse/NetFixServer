@@ -5,7 +5,7 @@
 TopLevelFolder := $(abspath $(dir $(lastword ${MAKEFILE_LIST})))
 
 
-SRCDIR := .
+SRCDIR := server
 BUILDDIR := .build
 BINDIR := $(BUILDDIR)/bin
 OBJDIR := $(BUILDDIR)/obj
