@@ -7,8 +7,7 @@ compiler:
   - gcc
   - clang
 script:
-  # Use -k to continue after errors, ensuring full build log with all errors
-  - make -k
+  - make --keep-going netFixServer
 notifications:
   email: false
 
