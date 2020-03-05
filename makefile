@@ -12,7 +12,7 @@ OBJDIR := $(BUILDDIR)/obj
 DEPDIR := $(BUILDDIR)/deps
 OUTPUT := $(BINDIR)/netfixserver
 
-CFLAGS := -std=c++17 -g -Wall -Wno-unknown-pragmas
+CFLAGS := -std=c++17 -g -Wall -Wno-unknown-pragmas -Wzero-as-null-pointer-constant
 LDFLAGS := -lstdc++ -lm
 
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.Td
