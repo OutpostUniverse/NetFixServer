@@ -21,8 +21,7 @@ constexpr GUID gameIdentifier = { 0x5A55CF11, 0xB841, 0x11CE, {0x92, 0x10, 0x00,
 GameServer::GameServer(unsigned short port) :
 	hostSocket(INVALID_SOCKET)
 {
-	// Clear counters
-	memset(&counters, 0, sizeof(counters));
+	counters = {};
 
 #ifdef WIN32
 	InitializeWinsock();
