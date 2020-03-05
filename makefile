@@ -13,7 +13,7 @@ BUILDDIR := .build
 BINDIR := $(BUILDDIR)/bin
 OBJDIR := $(BUILDDIR)/obj
 DEPDIR := $(BUILDDIR)/deps
-OUTPUT := $(BINDIR)/netfixserver
+OUTPUT := NetFixServer.exe
 
 CFLAGS := -std=c++17 -g -Wall -Wno-unknown-pragmas
 LDFLAGS := -lstdc++ -lm
