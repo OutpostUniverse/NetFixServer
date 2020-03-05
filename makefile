@@ -5,6 +5,9 @@
 TopLevelFolder := $(abspath $(dir $(lastword ${MAKEFILE_LIST})))
 
 
+.PHONY: all
+all: netFixServer
+
 SRCDIR := server
 BUILDDIR := .build
 BINDIR := $(BUILDDIR)/bin
@@ -24,7 +27,8 @@ SRCS := $(shell find $(SRCDIR) -name '*.cpp')
 OBJS := $(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o,$(SRCS))
 FOLDERS := $(sort $(dir $(SRCS)))
 
-all: $(OUTPUT)
+.PHONY: netFixServer
+netFixServer: $(OUTPUT)
 
 $(OUTPUT): $(OBJS)
 	@mkdir -p ${@D}
