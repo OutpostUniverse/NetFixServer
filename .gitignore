@@ -1,6 +1,6 @@
-.build/
-*.userprefs
-.vs/
 Debug/
 Release/
+.vs/
+.build/
+*.userprefs
 *.user
