@@ -101,7 +101,7 @@ void GameServer::WaitForEvent()
 	FD_SET(hostSocket, &readfds);
 	FD_SET(secondarySocket, &readfds);
 	// Wait for packets or timeout
-	select(1, &readfds, 0, 0, &timeOut);
+	select(1, &readfds, nullptr, nullptr, &timeOut);
 }
 
 
