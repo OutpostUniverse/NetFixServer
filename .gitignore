@@ -4,3 +4,4 @@ Release/
 .build/
 *.userprefs
 *.user
+NetFixServer.exe
