@@ -366,12 +366,12 @@ void GameServer::DoTimedUpdates()
 	#endif
 
 	// Get the current time
-	time_t currentTime = std::time(nullptr);
+	auto currentTime = std::time(nullptr);
 	// Check for timed out game entries
 	for (std::size_t i = gameSessions.size(); i-- > 0; )
 	{
 		// Get the current time difference
-		time_t timeDiff = currentTime - gameSessions[i].time;
+		auto timeDiff = currentTime - gameSessions[i].time;
 
 		// Check for no initial update within required time
 		if ((timeDiff >= InitialReplyTime) && ((gameSessions[i].flags & GameSessionReceived) == 0))
