@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Packet.h"
-#include <time.h>
+#include <ctime>
 #include <cstring>
 #include <cstddef>
 #include <vector>
