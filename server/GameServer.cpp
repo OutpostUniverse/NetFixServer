@@ -263,7 +263,7 @@ void GameServer::ProcessGameSearchReply(Packet& packet, sockaddr_in& from)
 	gameSession.flags |= GameSessionReceived;
 	gameSession.flags &= ~GameSessionExpected & ~GameSessionUpdateRetrySent;
 	gameSession.createGameInfo = packet.tlMessage.searchReply.createGameInfo;
-	gameSession.time = time(0);
+	gameSession.time = time(nullptr);
 }
 
 void GameServer::ProcessPoke(Packet& packet, sockaddr_in& from)
@@ -299,7 +299,7 @@ void GameServer::ProcessPoke(Packet& packet, sockaddr_in& from)
 		newGameSession.clientRandValue = packet.tlMessage.gameServerPoke.randValue;
 		newGameSession.serverRandValue = GetNewRandValue();
 		newGameSession.flags |= GameSessionExpected;
-		newGameSession.time = time(0);
+		newGameSession.time = time(nullptr);
 
 		// Send a request for games
 		SendGameSessionRequest(from, newGameSession.serverRandValue);
@@ -366,7 +366,7 @@ void GameServer::DoTimedUpdates()
 	#endif
 
 	// Get the current time
-	time_t currentTime = time(0);
+	time_t currentTime = time(nullptr);
 	// Check for timed out game entries
 	for (std::size_t i = gameSessions.size(); i-- > 0; )
 	{
