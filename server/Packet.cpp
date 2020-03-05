@@ -10,7 +10,7 @@ int Packet::Checksum()
 
 	// Checksum the post-checksum fields
 	int dataChecksum = 0;
-	int* data = (&header.checksum) + 1;
+	auto* data = reinterpret_cast<int*>(reinterpret_cast<char*>(&header.checksum) + 4);
 
 	// Handle DWORD at a time
 	for (int i = header.sizeOfPayload / 4; i > 0; --i)
