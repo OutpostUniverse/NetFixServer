@@ -1,6 +1,7 @@
-.build
+Debug/
+Release/
+.vs/
+.build/
 *.userprefs
-.vs
-Debug
-Release
 *.user
+NetFixServer.exe
