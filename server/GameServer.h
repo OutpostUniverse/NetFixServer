@@ -63,7 +63,7 @@ private:
 	{
 		GUID sessionIdentifier;
 		sockaddr_in addr;
-		time_t time;
+		std::time_t time;
 		unsigned int clientRandValue;
 		unsigned int serverRandValue;
 		unsigned int flags = 0;
