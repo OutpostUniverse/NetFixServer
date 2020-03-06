@@ -101,7 +101,7 @@ void GameServer::WaitForEvent()
 	FD_SET(hostSocket, &readfds);
 	FD_SET(secondarySocket, &readfds);
 	// Wait for packets or timeout
-	select(1, &readfds, 0, 0, &timeOut);
+	select(1, &readfds, nullptr, nullptr, &timeOut);
 }
 
 
@@ -263,7 +263,7 @@ void GameServer::ProcessGameSearchReply(Packet& packet, sockaddr_in& from)
 	gameSession.flags |= GameSessionReceived;
 	gameSession.flags &= ~GameSessionExpected & ~GameSessionUpdateRetrySent;
 	gameSession.createGameInfo = packet.tlMessage.searchReply.createGameInfo;
-	gameSession.time = time(0);
+	gameSession.time = std::time(nullptr);
 }
 
 void GameServer::ProcessPoke(Packet& packet, sockaddr_in& from)
@@ -299,7 +299,7 @@ void GameServer::ProcessPoke(Packet& packet, sockaddr_in& from)
 		newGameSession.clientRandValue = packet.tlMessage.gameServerPoke.randValue;
 		newGameSession.serverRandValue = GetNewRandValue();
 		newGameSession.flags |= GameSessionExpected;
-		newGameSession.time = time(0);
+		newGameSession.time = std::time(nullptr);
 
 		// Send a request for games
 		SendGameSessionRequest(from, newGameSession.serverRandValue);
@@ -366,12 +366,12 @@ void GameServer::DoTimedUpdates()
 	#endif
 
 	// Get the current time
-	time_t currentTime = time(0);
+	auto currentTime = std::time(nullptr);
 	// Check for timed out game entries
 	for (std::size_t i = gameSessions.size(); i-- > 0; )
 	{
 		// Get the current time difference
-		time_t timeDiff = currentTime - gameSessions[i].time;
+		auto timeDiff = currentTime - gameSessions[i].time;
 
 		// Check for no initial update within required time
 		if ((timeDiff >= InitialReplyTime) && ((gameSessions[i].flags & GameSessionReceived) == 0))
