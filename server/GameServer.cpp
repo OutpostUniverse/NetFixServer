@@ -81,7 +81,7 @@ void GameServer::Pump()
 		}
 
 		// Do periodic updates
-		DoTimedUpdates();
+		CheckTimedUpdates();
 
 		// Check if we are done processing packets
 		if (numBytes == -1) {
@@ -359,7 +359,7 @@ void GameServer::ProcessRequestExternalAddress(Packet& packet, sockaddr_in& from
 	}
 }
 
-void GameServer::DoTimedUpdates()
+void GameServer::CheckTimedUpdates()
 {
 	// Get the current time
 	auto currentTime = std::time(nullptr);
