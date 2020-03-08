@@ -101,7 +101,8 @@ private:
 	void ProcessGameSearchReply(Packet& packet, sockaddr_in& from);
 	void ProcessPoke(Packet& packet, sockaddr_in& from);
 	void ProcessRequestExternalAddress(Packet& packet, sockaddr_in& from);
-	void DoTimedUpdates();
+	void CheckTimedUpdates();
+	void DoTimedUpdate(std::size_t sessionIndex, long long timeDiff);
 	std::size_t FindGameSessionClient(const sockaddr_in& from, unsigned int clientRandValue);
 	std::size_t FindGameSessionServer(const sockaddr_in& from, unsigned int serverRandValue);
 	void FreeGameSession(std::size_t index);
