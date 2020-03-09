@@ -361,16 +361,11 @@ void GameServer::ProcessRequestExternalAddress(Packet& packet, sockaddr_in& from
 
 void GameServer::DoTimedUpdates()
 {
-	#ifdef DEBUG
-		//LogMessage("DoTimedUpdates()");
-	#endif
-
-	// Get the current time
 	auto currentTime = std::time(nullptr);
+
 	// Check for timed out game entries
 	for (std::size_t i = gameSessions.size(); i-- > 0; )
 	{
-		// Get the current time difference
 		auto timeDiff = currentTime - gameSessions[i].time;
 
 		// Check for no initial update within required time
@@ -418,8 +413,6 @@ void GameServer::DoTimedUpdates()
 			}
 		}
 	}
-
-	// Check if we should reduce memory usage **TODO**
 
 	LogCounters(counters);
 }
