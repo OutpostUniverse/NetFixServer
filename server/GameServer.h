@@ -91,6 +91,21 @@ private:
 		{
 			return memcmp(&addr, &socketAddress, sizeof(socketAddress)) == 0;
 		}
+
+		inline bool IsGameSessionExpected() const
+		{
+			return (flags & GameServerGameFlags::GameSessionExpected) != 0;
+		}
+
+		inline bool IsGameSessionReceived() const
+		{
+			return (flags & GameServerGameFlags::GameSessionReceived) != 0;
+		}
+
+		inline bool IsGameSessionUpdateRetrySent() const
+		{
+			return (flags & GameServerGameFlags::GameSessionUpdateRetrySent) != 0;
+		}
 	};
 
 	void AllocSocket(SOCKET& socket, unsigned short port);
