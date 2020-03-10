@@ -59,22 +59,6 @@ public:
 	void WaitForEvent();
 
 private:
-	struct GameSession
-	{
-		GUID sessionIdentifier;
-		sockaddr_in addr;
-		std::time_t time;
-		unsigned int clientRandValue;
-		unsigned int serverRandValue;
-		unsigned int flags = 0;
-		CreateGameInfo createGameInfo;
-
-		inline bool SocketAddressMatches(const sockaddr_in& socketAddress) const
-		{
-			return memcmp(&addr, &socketAddress, sizeof(socketAddress)) == 0;
-		}
-	};
-
 	enum GameServerGameFlags
 	{
 		GameSessionExpected = 1,
@@ -91,6 +75,22 @@ private:
 		PacketSizeFieldBad = -3,
 		PacketTypeBad = -4,
 		PacketChecksumBad = -5,
+	};
+
+	struct GameSession
+	{
+		GUID sessionIdentifier;
+		sockaddr_in addr;
+		std::time_t time;
+		unsigned int clientRandValue;
+		unsigned int serverRandValue;
+		unsigned int flags = 0;
+		CreateGameInfo createGameInfo;
+
+		inline bool SocketAddressMatches(const sockaddr_in& socketAddress) const
+		{
+			return memcmp(&addr, &socketAddress, sizeof(socketAddress)) == 0;
+		}
 	};
 
 	void AllocSocket(SOCKET& socket, unsigned short port);
