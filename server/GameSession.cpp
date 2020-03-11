@@ -1,8 +1,9 @@
 #include "GameSession.h"
+#include <cstring>
 
 bool GameSession::SocketAddressMatches(const sockaddr_in& socketAddress) const
 {
-	return memcmp(&addr, &socketAddress, sizeof(socketAddress)) == 0;
+	return std::memcmp(&addr, &socketAddress, sizeof(socketAddress)) == 0;
 }
 
 bool GameSession::IsGameSessionExpected() const
