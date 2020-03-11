@@ -302,7 +302,7 @@ void GameServer::ProcessPoke(Packet& packet, sockaddr_in& from)
 		newGameSession.time = std::time(nullptr);
 
 		// Send a request for games
-		SendGameSessionRequest(from, newGameSession.serverRandValue);
+		SendGameSessionRequest(newGameSession);
 
 		// Update counters
 		counters.numGamesHosted++;
@@ -425,7 +425,7 @@ void GameServer::RequestInitialGameUpdate(std::size_t sessionIndex)
 	LogEndpoint("Requesting Game info update 1 (periodic): ", gameSession.addr.sin_addr.s_addr, gameSession.addr.sin_port);
 
 	// Game info is stale, request update
-	SendGameSessionRequest(gameSession.addr, gameSession.serverRandValue);
+	SendGameSessionRequest(gameSession);
 	gameSession.flags |= GameSessionExpected;
 	counters.numUpdateRequestSent++;
 }
@@ -436,7 +436,7 @@ void GameServer::RequestFinalGameUpdate(std::size_t sessionIndex)
 	LogEndpoint("Requesting Game info update 2 (retry): ", gameSession.addr.sin_addr.s_addr, gameSession.addr.sin_port);
 
 	// Assume the packet was dropped. Retry.
-	SendGameSessionRequest(gameSession.addr, gameSession.serverRandValue);
+	SendGameSessionRequest(gameSession);
 	gameSession.flags |= GameSessionUpdateRetrySent;
 	counters.numRetrySent++;
 }
@@ -594,7 +594,7 @@ void GameServer::SendTo(Packet &packet, const sockaddr_in &to)
 }
 
 
-void GameServer::SendGameSessionRequest(sockaddr_in &to, unsigned int serverRandValue)
+void GameServer::SendGameSessionRequest(const GameSession& gameSession)
 {
 	Packet packet;
 
@@ -605,11 +605,11 @@ void GameServer::SendGameSessionRequest(sockaddr_in &to, unsigned int serverRand
 	packet.header.sizeOfPayload = sizeof(HostedGameSearchQuery);
 	packet.tlMessage.tlHeader.commandType = tlcHostedGameSearchQuery;
 	packet.tlMessage.searchQuery.gameIdentifier = gameIdentifier;
-	packet.tlMessage.searchQuery.timeStamp = serverRandValue;
+	packet.tlMessage.searchQuery.timeStamp = gameSession.serverRandValue;
 	memset(packet.tlMessage.searchQuery.password, 0, sizeof(packet.tlMessage.searchQuery.password));
 
 	// Send the packet
-	SendTo(packet, to);
+	SendTo(packet, gameSession.addr);
 }
 
 

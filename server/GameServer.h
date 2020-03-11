@@ -91,7 +91,7 @@ private:
 	int ReceiveFrom(Packet& packet, const sockaddr_in& from);
 	bool ReadSocketData(std::size_t& byteCountOut, SOCKET& socket, Packet& packetBuffer, const sockaddr_in& from);
 	void SendTo(Packet& packet, const sockaddr_in& to);
-	void SendGameSessionRequest(sockaddr_in& to, unsigned int serverRandValue);
+	void SendGameSessionRequest(const GameSession& gameSession);
 	// Win32 specific functions
 #ifdef WIN32
 	void InitializeWinsock();
