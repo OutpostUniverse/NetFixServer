@@ -80,6 +80,10 @@ private:
 	void ProcessPoke(Packet& packet, sockaddr_in& from);
 	void ProcessRequestExternalAddress(Packet& packet, sockaddr_in& from);
 	void DoTimedUpdates();
+	void DropGameNoInitialContact(std::size_t sessionIndex);
+	void DropGameLostContact(std::size_t sessionIndex);
+	void RequestInitialGameUpdate(std::size_t sessionIndex);
+	void RequestFinalGameUpdate(std::size_t sessionIndex);
 	std::size_t FindGameSessionClient(const sockaddr_in& from, unsigned int clientRandValue);
 	std::size_t FindGameSessionServer(const sockaddr_in& from, unsigned int serverRandValue);
 	void FreeGameSession(std::size_t index);
