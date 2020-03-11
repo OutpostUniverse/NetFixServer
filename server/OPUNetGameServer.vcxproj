@@ -110,6 +110,7 @@
   <ItemGroup>
     <ClCompile Include="ErrorLog.cpp" />
     <ClCompile Include="GameServer.cpp" />
+    <ClCompile Include="GameSession.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Packet.cpp" />
   </ItemGroup>
