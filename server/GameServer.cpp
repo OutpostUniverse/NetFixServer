@@ -387,11 +387,11 @@ void GameServer::DoTimedUpdates()
 			}
 			else if (!gameSession.IsGameSessionExpected())
 			{
-				RequestInitialGameUpdate(i);
+				RequestGameUpdateFirstTry(i);
 			}
 			else if (timeDiff >= RetryTime && !gameSession.IsGameSessionUpdateRetrySent())
 			{
-				RequestFinalGameUpdate(i);
+				RequestGameUpdateSecondTry(i);
 			}
 		}
 	}
@@ -419,7 +419,7 @@ void GameServer::DropGameLostContact(std::size_t sessionIndex)
 	counters.numGamesDropped++;
 }
 
-void GameServer::RequestInitialGameUpdate(std::size_t sessionIndex)
+void GameServer::RequestGameUpdateFirstTry(std::size_t sessionIndex)
 {
 	GameSession& gameSession = gameSessions[sessionIndex];
 	LogEndpoint("Requesting Game info update 1 (periodic): ", gameSession.addr.sin_addr.s_addr, gameSession.addr.sin_port);
@@ -430,7 +430,7 @@ void GameServer::RequestInitialGameUpdate(std::size_t sessionIndex)
 	counters.numUpdateRequestSent++;
 }
 
-void GameServer::RequestFinalGameUpdate(std::size_t sessionIndex)
+void GameServer::RequestGameUpdateSecondTry(std::size_t sessionIndex)
 {
 	GameSession& gameSession = gameSessions[sessionIndex];
 	LogEndpoint("Requesting Game info update 2 (retry): ", gameSession.addr.sin_addr.s_addr, gameSession.addr.sin_port);
