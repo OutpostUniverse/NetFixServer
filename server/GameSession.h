@@ -5,16 +5,8 @@
 
 #ifdef WIN32
 #include <winsock2.h>
-#define socklen_t int
 #else
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/ioctl.h>
 #include <netinet/in.h>
-#include <unistd.h>
-#define SOCKET int
-#define SOCKET_ERROR -1
-#define INVALID_SOCKET -1
 #endif
 
 enum GameServerGameFlags
