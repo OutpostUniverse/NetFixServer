@@ -369,7 +369,7 @@ void GameServer::DoTimedUpdates()
 		auto timeDiff = currentTime - gameSessions[i].time;
 
 		// Check for no initial update within required time
-		if ((timeDiff >= InitialReplyTime) && ((gameSessions[i].flags & GameSessionReceived) == 0))
+		if (timeDiff >= InitialReplyTime && !gameSessions[i].IsGameSessionReceived())
 		{
 			LogEndpoint("Dropping Game: No initial Host Info from: ", gameSessions[i].addr.sin_addr.s_addr, gameSessions[i].addr.sin_port);
 
@@ -379,7 +379,7 @@ void GameServer::DoTimedUpdates()
 			counters.numDroppedHostedPokes++;
 		}
 		// Check if no updates have occured for a while
-		else if ((timeDiff >= UpdateTime) && ((gameSessions[i].flags & GameSessionReceived) != 0))
+		else if (timeDiff >= UpdateTime && gameSessions[i].IsGameSessionReceived())
 		{
 			// Entry is old and requires update
 			// --------------------------------
@@ -393,7 +393,7 @@ void GameServer::DoTimedUpdates()
 				FreeGameSession(i);
 				counters.numGamesDropped++;
 			}
-			else if ((gameSessions[i].flags & GameSessionExpected) == 0)
+			else if (!gameSessions[i].IsGameSessionExpected())
 			{
 				LogEndpoint("Requesting Game info update 1 (periodic): ", gameSessions[i].addr.sin_addr.s_addr, gameSessions[i].addr.sin_port);
 
@@ -402,7 +402,7 @@ void GameServer::DoTimedUpdates()
 				gameSessions[i].flags |= GameSessionExpected;
 				counters.numUpdateRequestSent++;
 			}
-			else if ((timeDiff >= RetryTime) && ((gameSessions[i].flags & GameSessionUpdateRetrySent) == 0))
+			else if (timeDiff >= RetryTime && !gameSessions[i].IsGameSessionUpdateRetrySent())
 			{
 				LogEndpoint("Requesting Game info update 2 (retry): ", gameSessions[i].addr.sin_addr.s_addr, gameSessions[i].addr.sin_port);
 
