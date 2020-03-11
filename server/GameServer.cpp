@@ -366,15 +366,16 @@ void GameServer::DoTimedUpdates()
 	// Check for timed out game entries
 	for (std::size_t i = gameSessions.size(); i-- > 0; )
 	{
-		auto timeDiff = currentTime - gameSessions[i].time;
+		GameSession& gameSession = gameSessions[i];
+		auto timeDiff = currentTime - gameSession.time;
 
 		// Check for no initial update within required time
-		if (timeDiff >= InitialReplyTime && !gameSessions[i].IsGameSessionReceived())
+		if (timeDiff >= InitialReplyTime && !gameSession.IsGameSessionReceived())
 		{
 			DropGameNoInitialContact(i);
 		}
 		// Check if no updates have occured for a while
-		else if (timeDiff >= UpdateTime && gameSessions[i].IsGameSessionReceived())
+		else if (timeDiff >= UpdateTime && gameSession.IsGameSessionReceived())
 		{
 			// Entry is old and requires update
 			// --------------------------------
@@ -384,11 +385,11 @@ void GameServer::DoTimedUpdates()
 			{
 				DropGameLostContact(i);
 			}
-			else if (!gameSessions[i].IsGameSessionExpected())
+			else if (!gameSession.IsGameSessionExpected())
 			{
 				RequestInitialGameUpdate(i);
 			}
-			else if (timeDiff >= RetryTime && !gameSessions[i].IsGameSessionUpdateRetrySent())
+			else if (timeDiff >= RetryTime && !gameSession.IsGameSessionUpdateRetrySent())
 			{
 				RequestFinalGameUpdate(i);
 			}
@@ -410,7 +411,8 @@ void GameServer::DropGameNoInitialContact(std::size_t sessionIndex)
 
 void GameServer::DropGameLostContact(std::size_t sessionIndex)
 {
-	LogEndpoint("Dropping Game: Lost contact with host: ", gameSessions[sessionIndex].addr.sin_addr.s_addr, gameSessions[sessionIndex].addr.sin_port);
+	GameSession& gameSession = gameSessions[sessionIndex];
+	LogEndpoint("Dropping Game: Lost contact with host: ", gameSession.addr.sin_addr.s_addr, gameSession.addr.sin_port);
 
 	// Give up
 	FreeGameSession(sessionIndex);
@@ -419,20 +421,22 @@ void GameServer::DropGameLostContact(std::size_t sessionIndex)
 
 void GameServer::RequestInitialGameUpdate(std::size_t sessionIndex)
 {
-	LogEndpoint("Requesting Game info update 1 (periodic): ", gameSessions[sessionIndex].addr.sin_addr.s_addr, gameSessions[sessionIndex].addr.sin_port);
+	GameSession& gameSession = gameSessions[sessionIndex];
+	LogEndpoint("Requesting Game info update 1 (periodic): ", gameSession.addr.sin_addr.s_addr, gameSession.addr.sin_port);
 
 	// Game info is stale, request update
-	SendGameSessionRequest(gameSessions[sessionIndex].addr, gameSessions[sessionIndex].serverRandValue);
-	gameSessions[sessionIndex].flags |= GameSessionExpected;
+	SendGameSessionRequest(gameSession.addr, gameSession.serverRandValue);
+	gameSession.flags |= GameSessionExpected;
 	counters.numUpdateRequestSent++;
 }
 
 void GameServer::RequestFinalGameUpdate(std::size_t sessionIndex)
 {
-	LogEndpoint("Requesting Game info update 2 (retry): ", gameSessions[sessionIndex].addr.sin_addr.s_addr, gameSessions[sessionIndex].addr.sin_port);
+	GameSession& gameSession = gameSessions[sessionIndex];
+	LogEndpoint("Requesting Game info update 2 (retry): ", gameSession.addr.sin_addr.s_addr, gameSession.addr.sin_port);
 
 	// Assume the packet was dropped. Retry.
-	SendGameSessionRequest(gameSessions[sessionIndex].addr, gameSessions[sessionIndex].serverRandValue);
+	SendGameSessionRequest(gameSession.addr, gameSession.serverRandValue);
 	gameSessions[sessionIndex].flags |= GameSessionUpdateRetrySent;
 	counters.numRetrySent++;
 }
