@@ -437,7 +437,7 @@ void GameServer::RequestFinalGameUpdate(std::size_t sessionIndex)
 
 	// Assume the packet was dropped. Retry.
 	SendGameSessionRequest(gameSession.addr, gameSession.serverRandValue);
-	gameSessions[sessionIndex].flags |= GameSessionUpdateRetrySent;
+	gameSession.flags |= GameSessionUpdateRetrySent;
 	counters.numRetrySent++;
 }
 
