@@ -116,6 +116,7 @@
   <ItemGroup>
     <ClInclude Include="ErrorLog.h" />
     <ClInclude Include="GameServer.h" />
+    <ClInclude Include="GameSession.h" />
     <ClInclude Include="Packet.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

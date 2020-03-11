@@ -16,5 +16,6 @@
     <ClInclude Include="ErrorLog.h" />
     <ClInclude Include="GameServer.h" />
     <ClInclude Include="Packet.h" />
+    <ClInclude Include="GameSession.h" />
   </ItemGroup>
 </Project>
