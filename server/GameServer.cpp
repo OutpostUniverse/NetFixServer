@@ -476,13 +476,6 @@ std::size_t GameServer::FindGameSessionServer(const sockaddr_in &from, unsigned 
 
 void GameServer::FreeGameSession(std::size_t index)
 {
-	// Make sure it's a valid index
-	if (index >= gameSessions.size())
-	{
-		LogMessage("Internal Error: Tried to free a non-existent GameSession record");
-		return;
-	}
-
 	gameSessions.erase(gameSessions.begin() + index);
 }
 
