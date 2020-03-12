@@ -302,7 +302,7 @@ void GameServer::ProcessPoke(Packet& packet, sockaddr_in& from)
 		newGameSession.time = std::time(nullptr);
 
 		// Send a request for games
-		SendGameSessionRequest(from, newGameSession.serverRandValue);
+		SendGameSessionRequest(newGameSession);
 
 		// Update counters
 		counters.numGamesHosted++;
@@ -361,30 +361,21 @@ void GameServer::ProcessRequestExternalAddress(Packet& packet, sockaddr_in& from
 
 void GameServer::DoTimedUpdates()
 {
-	#ifdef DEBUG
-		//LogMessage("DoTimedUpdates()");
-	#endif
-
-	// Get the current time
 	auto currentTime = std::time(nullptr);
+
 	// Check for timed out game entries
 	for (std::size_t i = gameSessions.size(); i-- > 0; )
 	{
-		// Get the current time difference
-		auto timeDiff = currentTime - gameSessions[i].time;
+		GameSession& gameSession = gameSessions[i];
+		auto timeDiff = currentTime - gameSession.time;
 
 		// Check for no initial update within required time
-		if ((timeDiff >= InitialReplyTime) && ((gameSessions[i].flags & GameSessionReceived) == 0))
+		if (timeDiff >= InitialReplyTime && !gameSession.IsGameSessionReceived())
 		{
-			LogEndpoint("Dropping Game: No initial Host Info from: ", gameSessions[i].addr.sin_addr.s_addr, gameSessions[i].addr.sin_port);
-
-			// Clear bogus entry
-			FreeGameSession(i);
-			// Update counters
-			counters.numDroppedHostedPokes++;
+			DropGameNoInitialContact(i);
 		}
 		// Check if no updates have occured for a while
-		else if ((timeDiff >= UpdateTime) && ((gameSessions[i].flags & GameSessionReceived) != 0))
+		else if (timeDiff >= UpdateTime && gameSession.IsGameSessionReceived())
 		{
 			// Entry is old and requires update
 			// --------------------------------
@@ -392,36 +383,60 @@ void GameServer::DoTimedUpdates()
 			// Check if enough time has elapsed to give up
 			if (timeDiff >= GiveUpTime)
 			{
-				LogEndpoint("Dropping Game: Lost contact with host: ", gameSessions[i].addr.sin_addr.s_addr, gameSessions[i].addr.sin_port);
-
-				// Give up
-				FreeGameSession(i);
-				counters.numGamesDropped++;
+				DropGameLostContact(i);
 			}
-			else if ((gameSessions[i].flags & GameSessionExpected) == 0)
+			else if (!gameSession.IsGameSessionExpected())
 			{
-				LogEndpoint("Requesting Game info update 1 (periodic): ", gameSessions[i].addr.sin_addr.s_addr, gameSessions[i].addr.sin_port);
-
-				// Game info is stale, request update
-				SendGameSessionRequest(gameSessions[i].addr, gameSessions[i].serverRandValue);
-				gameSessions[i].flags |= GameSessionExpected;
-				counters.numUpdateRequestSent++;
+				RequestGameUpdateFirstTry(gameSession);
 			}
-			else if ((timeDiff >= RetryTime) && ((gameSessions[i].flags & GameSessionUpdateRetrySent) == 0))
+			else if (timeDiff >= RetryTime && !gameSession.IsGameSessionUpdateRetrySent())
 			{
-				LogEndpoint("Requesting Game info update 2 (retry): ", gameSessions[i].addr.sin_addr.s_addr, gameSessions[i].addr.sin_port);
-
-				// Assume the packet was dropped. Retry.
-				SendGameSessionRequest(gameSessions[i].addr, gameSessions[i].serverRandValue);
-				gameSessions[i].flags |= GameSessionUpdateRetrySent;
-				counters.numRetrySent++;
+				RequestGameUpdateSecondTry(gameSession);
 			}
 		}
 	}
 
-	// Check if we should reduce memory usage **TODO**
-
 	LogCounters(counters);
+}
+
+void GameServer::DropGameNoInitialContact(std::size_t sessionIndex)
+{
+	LogEndpoint("Dropping Game: No initial Host Info from: ", gameSessions[sessionIndex].addr.sin_addr.s_addr, gameSessions[sessionIndex].addr.sin_port);
+
+	// Clear bogus entry
+	FreeGameSession(sessionIndex);
+	// Update counters
+	counters.numDroppedHostedPokes++;
+}
+
+void GameServer::DropGameLostContact(std::size_t sessionIndex)
+{
+	GameSession& gameSession = gameSessions[sessionIndex];
+	LogEndpoint("Dropping Game: Lost contact with host: ", gameSession.addr.sin_addr.s_addr, gameSession.addr.sin_port);
+
+	// Give up
+	FreeGameSession(sessionIndex);
+	counters.numGamesDropped++;
+}
+
+void GameServer::RequestGameUpdateFirstTry(GameSession& gameSession)
+{
+	LogEndpoint("Requesting Game info update 1 (periodic): ", gameSession.addr.sin_addr.s_addr, gameSession.addr.sin_port);
+
+	// Game info is stale, request update
+	SendGameSessionRequest(gameSession);
+	gameSession.flags |= GameSessionExpected;
+	counters.numUpdateRequestSent++;
+}
+
+void GameServer::RequestGameUpdateSecondTry(GameSession& gameSession)
+{
+	LogEndpoint("Requesting Game info update 2 (retry): ", gameSession.addr.sin_addr.s_addr, gameSession.addr.sin_port);
+
+	// Assume the packet was dropped. Retry.
+	SendGameSessionRequest(gameSession);
+	gameSession.flags |= GameSessionUpdateRetrySent;
+	counters.numRetrySent++;
 }
 
 std::size_t GameServer::FindGameSessionClient(const sockaddr_in &from, unsigned int clientRandValue)
@@ -577,7 +592,7 @@ void GameServer::SendTo(Packet &packet, const sockaddr_in &to)
 }
 
 
-void GameServer::SendGameSessionRequest(sockaddr_in &to, unsigned int serverRandValue)
+void GameServer::SendGameSessionRequest(const GameSession& gameSession)
 {
 	Packet packet;
 
@@ -588,11 +603,11 @@ void GameServer::SendGameSessionRequest(sockaddr_in &to, unsigned int serverRand
 	packet.header.sizeOfPayload = sizeof(HostedGameSearchQuery);
 	packet.tlMessage.tlHeader.commandType = tlcHostedGameSearchQuery;
 	packet.tlMessage.searchQuery.gameIdentifier = gameIdentifier;
-	packet.tlMessage.searchQuery.timeStamp = serverRandValue;
+	packet.tlMessage.searchQuery.timeStamp = gameSession.serverRandValue;
 	memset(packet.tlMessage.searchQuery.password, 0, sizeof(packet.tlMessage.searchQuery.password));
 
 	// Send the packet
-	SendTo(packet, to);
+	SendTo(packet, gameSession.addr);
 }
 
 

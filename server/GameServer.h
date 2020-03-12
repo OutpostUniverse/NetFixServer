@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GameSession.h"
 #include "Packet.h"
 #include <ctime>
 #include <cstring>
@@ -59,29 +60,6 @@ public:
 	void WaitForEvent();
 
 private:
-	struct GameSession
-	{
-		GUID sessionIdentifier;
-		sockaddr_in addr;
-		std::time_t time;
-		unsigned int clientRandValue;
-		unsigned int serverRandValue;
-		unsigned int flags = 0;
-		CreateGameInfo createGameInfo;
-
-		inline bool SocketAddressMatches(const sockaddr_in& socketAddress) const
-		{
-			return memcmp(&addr, &socketAddress, sizeof(socketAddress)) == 0;
-		}
-	};
-
-	enum GameServerGameFlags
-	{
-		GameSessionExpected = 1,
-		GameSessionReceived = 2,
-		GameSessionUpdateRetrySent = 4,
-	};
-
 	enum GameServerPacketErrorCode
 	{
 		// No packet
@@ -102,6 +80,10 @@ private:
 	void ProcessPoke(Packet& packet, sockaddr_in& from);
 	void ProcessRequestExternalAddress(Packet& packet, sockaddr_in& from);
 	void DoTimedUpdates();
+	void DropGameNoInitialContact(std::size_t sessionIndex);
+	void DropGameLostContact(std::size_t sessionIndex);
+	void RequestGameUpdateFirstTry(GameSession& gameSession);
+	void RequestGameUpdateSecondTry(GameSession& gameSession);
 	std::size_t FindGameSessionClient(const sockaddr_in& from, unsigned int clientRandValue);
 	std::size_t FindGameSessionServer(const sockaddr_in& from, unsigned int serverRandValue);
 	void FreeGameSession(std::size_t index);
@@ -109,7 +91,7 @@ private:
 	int ReceiveFrom(Packet& packet, const sockaddr_in& from);
 	bool ReadSocketData(std::size_t& byteCountOut, SOCKET& socket, Packet& packetBuffer, const sockaddr_in& from);
 	void SendTo(Packet& packet, const sockaddr_in& to);
-	void SendGameSessionRequest(sockaddr_in& to, unsigned int serverRandValue);
+	void SendGameSessionRequest(const GameSession& gameSession);
 	// Win32 specific functions
 #ifdef WIN32
 	void InitializeWinsock();

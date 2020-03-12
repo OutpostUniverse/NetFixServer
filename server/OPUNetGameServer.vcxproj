@@ -110,12 +110,14 @@
   <ItemGroup>
     <ClCompile Include="ErrorLog.cpp" />
     <ClCompile Include="GameServer.cpp" />
+    <ClCompile Include="GameSession.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Packet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ErrorLog.h" />
     <ClInclude Include="GameServer.h" />
+    <ClInclude Include="GameSession.h" />
     <ClInclude Include="Packet.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
