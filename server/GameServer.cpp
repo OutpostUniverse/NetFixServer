@@ -387,11 +387,11 @@ void GameServer::DoTimedUpdates()
 			}
 			else if (!gameSession.IsGameSessionExpected())
 			{
-				RequestGameUpdateFirstTry(i);
+				RequestGameUpdateFirstTry(gameSession);
 			}
 			else if (timeDiff >= RetryTime && !gameSession.IsGameSessionUpdateRetrySent())
 			{
-				RequestGameUpdateSecondTry(i);
+				RequestGameUpdateSecondTry(gameSession);
 			}
 		}
 	}
@@ -419,9 +419,8 @@ void GameServer::DropGameLostContact(std::size_t sessionIndex)
 	counters.numGamesDropped++;
 }
 
-void GameServer::RequestGameUpdateFirstTry(std::size_t sessionIndex)
+void GameServer::RequestGameUpdateFirstTry(GameSession& gameSession)
 {
-	GameSession& gameSession = gameSessions[sessionIndex];
 	LogEndpoint("Requesting Game info update 1 (periodic): ", gameSession.addr.sin_addr.s_addr, gameSession.addr.sin_port);
 
 	// Game info is stale, request update
@@ -430,9 +429,8 @@ void GameServer::RequestGameUpdateFirstTry(std::size_t sessionIndex)
 	counters.numUpdateRequestSent++;
 }
 
-void GameServer::RequestGameUpdateSecondTry(std::size_t sessionIndex)
+void GameServer::RequestGameUpdateSecondTry(GameSession& gameSession)
 {
-	GameSession& gameSession = gameSessions[sessionIndex];
 	LogEndpoint("Requesting Game info update 2 (retry): ", gameSession.addr.sin_addr.s_addr, gameSession.addr.sin_port);
 
 	// Assume the packet was dropped. Retry.

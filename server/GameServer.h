@@ -82,8 +82,8 @@ private:
 	void DoTimedUpdates();
 	void DropGameNoInitialContact(std::size_t sessionIndex);
 	void DropGameLostContact(std::size_t sessionIndex);
-	void RequestGameUpdateFirstTry(std::size_t sessionIndex);
-	void RequestGameUpdateSecondTry(std::size_t sessionIndex);
+	void RequestGameUpdateFirstTry(GameSession& gameSession);
+	void RequestGameUpdateSecondTry(GameSession& gameSession);
 	std::size_t FindGameSessionClient(const sockaddr_in& from, unsigned int clientRandValue);
 	std::size_t FindGameSessionServer(const sockaddr_in& from, unsigned int serverRandValue);
 	void FreeGameSession(std::size_t index);
