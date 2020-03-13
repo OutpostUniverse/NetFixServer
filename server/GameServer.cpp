@@ -567,7 +567,6 @@ bool GameServer::ReadSocketData(std::size_t& byteCountOut, SOCKET& socket, Packe
 
 void GameServer::SendTo(Packet &packet, const sockaddr_in &to)
 {
-	int errorCode;
 	int size = packet.header.sizeOfPayload + sizeof(packet.header);
 	int toLen = sizeof(to);
 
@@ -575,7 +574,7 @@ void GameServer::SendTo(Packet &packet, const sockaddr_in &to)
 	packet.header.checksum = packet.Checksum();
 
 	// Send the packet
-	errorCode = sendto(hostSocket, (char*)&packet, size, 0, (sockaddr*)&to, toLen);
+	auto errorCode = sendto(hostSocket, (char*)&packet, size, 0, (sockaddr*)&to, toLen);
 
 	if (errorCode == SOCKET_ERROR)
 	{
