@@ -34,7 +34,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	try 
+	try
 	{
 		GameServer gameServer(portNum);
 

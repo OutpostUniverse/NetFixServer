@@ -96,7 +96,7 @@ void GameServer::WaitForEvent()
 	fd_set readfds;
 	timeval timeOut = { 1, 0 };
 
-	// Clear the read 
+	// Clear the read
 	FD_ZERO(&readfds);
 	FD_SET(hostSocket, &readfds);
 	FD_SET(secondarySocket, &readfds);
@@ -619,7 +619,7 @@ void GameServer::SendGameSessionRequest(const GameSession& gameSession)
 			if (wsaData.wVersion != version)
 			{
 				WSACleanup();
-				throw std::runtime_error("Incorrect version of Winsock initialized in GameServer. Requested Version: " + 
+				throw std::runtime_error("Incorrect version of Winsock initialized in GameServer. Requested Version: " +
 					std::to_string(version) + ". Initialized Version: " + std::to_string(wsaData.wVersion));
 			}
 		}
